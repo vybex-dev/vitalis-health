@@ -1,0 +1,171 @@
+@import "tailwindcss";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+/*
+  Vitalis design tokens
+  -----------------------------------------------------------------
+  Porcelain + ink-teal base, coral "pulse" accent, sage/amber/alert
+  semantic signals. Space Grotesk for display, IBM Plex Sans for
+  body copy, IBM Plex Mono for vitals / data readouts.
+*/
+:root {
+  --color-porcelain: #f4f7f6;
+  --color-porcelain-2: #e9f0ee;
+  --color-white: #ffffff;
+
+  --color-ink: #0e2b29;
+  --color-ink-2: #1f4742;
+  --color-ink-soft: #4c6863;
+
+  --color-teal-deep: #10322d;
+  --color-teal-deep-2: #0a2320;
+
+  --color-coral: #ff6152;
+  --color-coral-dark: #e2483a;
+  --color-coral-light: #ffe4e0;
+
+  --color-sage: #4f9c7d;
+  --color-sage-dark: #357259;
+  --color-sage-light: #e2f2ea;
+
+  --color-amber: #e2a83f;
+  --color-amber-dark: #b9821f;
+  --color-amber-light: #fbf0da;
+
+  --color-alert: #d34331;
+  --color-alert-dark: #a92f21;
+  --color-alert-light: #fbe4e0;
+
+  --color-border: #dce6e2;
+  --color-border-strong: #c2d2cc;
+
+  --shadow-soft: 0 1px 2px rgba(14, 43, 41, 0.04), 0 8px 24px -12px rgba(14, 43, 41, 0.12);
+  --shadow-card: 0 1px 1px rgba(14, 43, 41, 0.03), 0 12px 32px -16px rgba(14, 43, 41, 0.18);
+}
+
+@theme inline {
+  --color-porcelain: var(--color-porcelain);
+  --color-porcelain-2: var(--color-porcelain-2);
+  --color-white: var(--color-white);
+
+  --color-ink: var(--color-ink);
+  --color-ink-2: var(--color-ink-2);
+  --color-ink-soft: var(--color-ink-soft);
+
+  --color-teal-deep: var(--color-teal-deep);
+  --color-teal-deep-2: var(--color-teal-deep-2);
+
+  --color-coral: var(--color-coral);
+  --color-coral-dark: var(--color-coral-dark);
+  --color-coral-light: var(--color-coral-light);
+
+  --color-sage: var(--color-sage);
+  --color-sage-dark: var(--color-sage-dark);
+  --color-sage-light: var(--color-sage-light);
+
+  --color-amber: var(--color-amber);
+  --color-amber-dark: var(--color-amber-dark);
+  --color-amber-light: var(--color-amber-light);
+
+  --color-alert: var(--color-alert);
+  --color-alert-dark: var(--color-alert-dark);
+  --color-alert-light: var(--color-alert-light);
+
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+
+  --font-display: "Space Grotesk", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --animate-pulse-slow: pulse-slow 3.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-rise: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-drift: drift 8s ease-in-out infinite;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-porcelain);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.font-data {
+  font-family: var(--font-data);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+::selection {
+  background: var(--color-coral);
+  color: var(--color-white);
+}
+
+/* Visible keyboard focus everywhere, brand-colored */
+:focus-visible {
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thin gradient "pulse line" rule used as a section divider */
+.pulse-rule {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--color-border-strong) 20%, var(--color-border-strong) 80%, transparent);
+}
