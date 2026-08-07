@@ -1,4 +1,4 @@
-import type { VitalReading, JournalEntry, SymptomCheck, HealthInsight } from "@/types";
+import type { VitalReading, JournalEntry, SymptomCheck, HealthInsight, DocumentExtraction } from "@/types";
 
 async function postJSON<T>(url: string, token: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -42,4 +42,11 @@ export async function summarizeJournal(
   entries: JournalEntry[]
 ): Promise<{ summary: string; moodTrend: string; recurringSymptoms: string[]; suggestion: string }> {
   return postJSON("/api/journal/summary", token, { entries });
+}
+
+export async function extractDocument(
+  token: string,
+  input: { fileBase64: string; mimeType: string }
+): Promise<DocumentExtraction> {
+  return postJSON("/api/documents/extract", token, input);
 }

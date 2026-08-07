@@ -51,6 +51,35 @@ export async function* streamGeminiChat(messages: SimpleMessage[]) {
 }
 
 /**
+ * Calls Gemini 2.5 Flash with an inline file (image or PDF, base64) plus a
+ * text instruction, and parses the response as JSON. Used for document
+ * extraction (lab reports / prescriptions), which supports Gemini's native
+ * multimodal input — no separate OCR step needed.
+ */
+export async function generateGeminiJSONFromFile<T>(
+  systemInstruction: string,
+  fileBase64: string,
+  mimeType: string,
+  promptText: string
+): Promise<T> {
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({
+    model: GEMINI_MODEL,
+    systemInstruction,
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.2,
+    },
+  });
+  const result = await model.generateContent([
+    { inlineData: { data: fileBase64, mimeType } },
+    { text: promptText },
+  ]);
+  const text = result.response.text();
+  return JSON.parse(text) as T;
+}
+
+/**
  * Calls Gemini 2.5 Flash and parses the response as JSON. Used for the
  * symptom checker and insight generator, which both request strict JSON
  * output via their system prompts.

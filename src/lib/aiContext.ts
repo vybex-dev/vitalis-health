@@ -1,9 +1,10 @@
-import type { UserProfile, VitalReading, Medication } from "@/types";
+import type { UserProfile, VitalReading, Medication, LabResult } from "@/types";
 
 export function buildUserContext(
   profile: UserProfile | null,
   vitals: VitalReading[],
-  medications: Medication[]
+  medications: Medication[],
+  labResults: LabResult[] = []
 ): string {
   const lines: string[] = [];
 
@@ -31,6 +32,16 @@ export function buildUserContext(
   const activeMeds = medications.filter((m) => m.active);
   if (activeMeds.length) {
     lines.push("Active medications: " + activeMeds.map((m) => `${m.name} ${m.dosage}`).join("; "));
+  }
+
+  const recentLabs = labResults.slice(0, 15);
+  if (recentLabs.length) {
+    lines.push(
+      "Recent lab results: " +
+        recentLabs
+          .map((r) => `${r.testName}=${r.value}${r.unit ? ` ${r.unit}` : ""} (${r.flag}, ${r.recordedAt.slice(0, 10)})`)
+          .join("; ")
+    );
   }
 
   return lines.join("\n");

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useVitals } from "@/hooks/useVitals";
 import { useMedications } from "@/hooks/useMedications";
+import { useLabResults } from "@/hooks/useLabResults";
 import { buildUserContext } from "@/lib/aiContext";
 import {
   addChatMessage,
@@ -18,6 +19,7 @@ export function useChatSession() {
   const { user, profile, getIdToken } = useAuth();
   const { vitals } = useVitals();
   const { medications } = useMedications();
+  const { results: labResults } = useLabResults();
 
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
@@ -72,7 +74,7 @@ export function useChatSession() {
         const token = await getIdToken();
         if (!token) throw new Error("Not signed in.");
 
-        const context = buildUserContext(profile, vitals, medications);
+        const context = buildUserContext(profile, vitals, medications, labResults);
         const endpoint = mode === "deep" ? "/api/chat/deep" : "/api/chat";
 
         const res = await fetch(endpoint, {
@@ -109,7 +111,7 @@ export function useChatSession() {
         setSending(false);
       }
     },
-    [user, sending, activeThreadId, mode, messages, profile, vitals, medications, getIdToken]
+    [user, sending, activeThreadId, mode, messages, profile, vitals, medications, labResults, getIdToken]
   );
 
   const bottomRef = useRef<HTMLDivElement>(null);

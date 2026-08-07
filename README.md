@@ -20,6 +20,7 @@ system — not a template.
 |---|---|
 | **AI Copilot** | Two-speed chat: instant answers via Groq, or "Deep analysis" via Gemini 2.5 Flash. Threaded conversation history stored per user. Streams token-by-token. |
 | **Symptom Checker** | Interactive 3D body map (raycasting on a procedural Three.js humanoid) → structured triage via Gemini, returning an urgency level, possible factors, red flags, and self-care tips — always non-diagnostic. |
+| **Documents** | Upload a lab report or prescription (PDF/photo, compressed client-side to fit Firestore's per-document limit) — Gemini 2.5 Flash reads it directly (no OCR library, no object storage service needed) and extracts test results or medications into an editable review screen. Nothing saves to your health record until you confirm it. |
 | **Vitals** | Log blood pressure, heart rate, weight, glucose, SpO₂, sleep, steps, temperature. Realtime line charts (Recharts) per type. |
 | **Medications** | Dosage, frequency, schedule, one-tap "mark as taken," archive/restore. |
 | **Journal** | Daily mood + symptom + note logging, with an AI-generated reflection/summary. |
@@ -48,6 +49,19 @@ with the Admin SDK before doing anything. This keeps the backend surface
 small, keeps API keys off the client, and still deploys as one Vercel
 project with zero extra infrastructure.
 
+The same server-only-for-secrets principle applies to uploaded documents,
+just without a separate storage service: the browser compresses the file
+(images are downscaled/re-encoded to fit; PDFs are size-checked) and reads
+it as base64, which gets written straight into the document's Firestore
+record — protected by the same per-user Firestore rules as everything else.
+`/api/documents/extract` receives that base64 directly and sends it to
+Gemini 2.5 Flash's multimodal input; nothing is ever fetched by reference
+from a bucket. This keeps the whole app on Firestore's free Spark plan,
+with no billing account required. The tradeoff is a ~700KB-per-file budget
+(Firestore's 1MB document cap, minus room for base64 overhead and the rest
+of the document's fields) — plenty for a single-page lab report or
+prescription, tight for a long multi-page PDF.
+
 ---
 
 ## Project structure
@@ -60,24 +74,28 @@ src/
     onboarding/               Post-signup profile wizard
     (app)/                    Authenticated app shell (sidebar + guards)
       dashboard, chat, vitals, medications,
-      symptom-checker, journal, insights, profile
+      symptom-checker, documents, documents/[id], journal, insights, profile
     api/
       chat/route.ts           Groq streaming chat ("Quick" mode)
       chat/deep/route.ts      Gemini streaming chat ("Deep analysis" mode)
       symptom-check/route.ts  Gemini structured JSON triage
+      documents/extract/route.ts  Gemini multimodal extraction (lab reports/prescriptions)
       insights/weekly/route.ts  Gemini structured JSON weekly insight
       journal/summary/route.ts  Gemini structured JSON journal reflection
   components/
     three/                   PulseOrb, HealthOrb, BodyMap, ParticleField, PulseLine
     ui/                      Button, Card, Input, Modal, Badge, etc.
-    layout/, landing/, chat/, vitals/, medications/, journal/, symptom/, dashboard/, auth/
+    layout/, landing/, chat/, vitals/, medications/, journal/, symptom/,
+    documents/               DocumentUploader, LabResultsReview, MedicationsExtractionReview
+    dashboard/, auth/
   lib/
-    firebase/client.ts        Firebase client SDK init
+    firebase/client.ts        Firebase client SDK init (Auth, Firestore)
     firebase/admin.ts         Firebase Admin SDK init + ID token verification
     firebase/repo.ts          All Firestore reads/writes + realtime subscriptions
     ai/groq.ts, ai/gemini.ts  AI provider wrappers
     ai/systemPrompts.ts       Every prompt sent to the models, with safety framing
     aiClient.ts, aiContext.ts Client helpers for calling the API routes
+    fileUpload.ts              Client-side image compression / base64 prep for uploads
     healthScore.ts            Transparent dashboard health-score heuristic
     rateLimit.ts               Best-effort in-memory rate limiter
   hooks/                       Realtime Firestore hooks (useVitals, useMedications, …)
@@ -99,8 +117,8 @@ npm install
 
 1. Go to the [Firebase console](https://console.firebase.google.com/) → **Add project**.
 2. **Build → Authentication → Get started.** Enable **Email/Password** and **Google** sign-in providers.
-3. **Build → Firestore Database → Create database** (start in production mode — the included rules lock it down).
-4. **Project settings → General → Your apps → Add app → Web.** Copy the `firebaseConfig` values into `.env.local` (see step 4).
+3. **Build → Firestore Database → Create database** (start in production mode — the included rules lock it down). This is the only data store the app uses — including uploaded documents — so there's no need to enable Firebase Storage or upgrade off the free Spark plan.
+4. **Project settings → General → Your apps → Add app → Web.** Copy the `firebaseConfig` values into `.env.local` (see below).
 5. **Project settings → Service accounts → Generate new private key.** This downloads a JSON file — you'll need three fields from it (`project_id`, `client_email`, `private_key`) for the Admin SDK.
 6. Deploy the security rules: either paste `firestore.rules` into **Firestore Database → Rules** in the console and click **Publish**, or with the Firebase CLI:
    ```bash
@@ -159,6 +177,7 @@ in `src/lib/ai/systemPrompts.ts`:
 
 - The copilot never outputs a definitive diagnosis or prescribes/adjusts medication dosages.
 - The symptom checker and every chat mode share an explicit list of emergency "red flag" symptoms (chest pain, stroke signs, severe bleeding, anaphylaxis, suicidal intent, etc.) — when a message plausibly matches, the model is instructed to lead with "seek emergency care now" and the UI surfaces a one-tap call-911 button.
+- Uploaded documents are treated as OCR/transcription only — the model is instructed never to interpret what a lab value "means" medically, only to transcribe it and flag it against the document's own printed reference range. Nothing extracted from a document is saved automatically; the user reviews and edits every row before it's written to their record.
 - All AI responses are framed as general information, with recurring nudges toward professional care.
 - A persistent Emergency button is available throughout the authenticated app.
 

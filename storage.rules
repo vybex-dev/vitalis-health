@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// Vitalis Storage security rules.
+//
+// Uploaded lab reports / prescriptions live at
+// users/{uid}/documents/{docId}/{fileName} and are readable/writable only
+// by that authenticated user. Deploy with:
+//   firebase deploy --only storage
+// (Console alternative: Firebase Console -> Storage -> Rules -> paste ->
+// Publish.)
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid}/documents/{docId}/{fileName} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && request.resource.size < 15 * 1024 * 1024;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -79,6 +79,7 @@ export interface Medication {
   active: boolean;
   color: string;
   lastTakenAt?: string | null;
+  sourceDocumentId?: string | null;
   createdAt: string;
 }
 
@@ -161,4 +162,57 @@ export interface HealthScore {
   score: number; // 0-100
   label: "great" | "good" | "fair" | "needs_attention";
   factors: string[];
+}
+
+// ------------------------------------------------------- uploaded documents
+export type DocumentType = "lab_report" | "prescription" | "other";
+export type DocumentStatus = "processing" | "pending_review" | "reviewed" | "discarded" | "failed";
+
+export interface ExtractedLabValue {
+  testName: string;
+  value: string; // kept as string — lab values aren't always numeric (e.g. "Negative")
+  unit?: string;
+  referenceRange?: string;
+  flag: "low" | "normal" | "high" | "unknown";
+}
+
+export interface ExtractedMedication {
+  medicationName: string;
+  dosage?: string;
+  frequency?: string;
+  instructions?: string;
+}
+
+export interface DocumentExtraction {
+  documentType: DocumentType;
+  summary: string;
+  labValues: ExtractedLabValue[];
+  medications: ExtractedMedication[];
+  lowConfidenceWarning: boolean;
+  disclaimer: string;
+}
+
+export interface HealthDocument {
+  id: string;
+  fileName: string;
+  fileBase64: string;
+  mimeType: string;
+  sizeBytes: number;
+  status: DocumentStatus;
+  extraction?: DocumentExtraction | null;
+  error?: string | null;
+  uploadedAt: string;
+  reviewedAt?: string | null;
+}
+
+export interface LabResult {
+  id: string;
+  testName: string;
+  value: string;
+  unit?: string;
+  referenceRange?: string;
+  flag: "low" | "normal" | "high" | "unknown";
+  recordedAt: string;
+  sourceDocumentId?: string | null;
+  createdAt: string;
 }

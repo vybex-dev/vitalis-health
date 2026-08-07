@@ -19,13 +19,27 @@ const FREQUENCIES: { value: MedicationFrequency; label: string; defaultTimes: st
   { value: "custom", label: "Custom", defaultTimes: [] },
 ];
 
-export function MedicationForm({ onDone }: { onDone: () => void }) {
+export interface MedicationFormInitial {
+  name?: string;
+  dosage?: string;
+  instructions?: string;
+}
+
+export function MedicationForm({
+  onDone,
+  initial,
+  sourceDocumentId,
+}: {
+  onDone: () => void;
+  initial?: MedicationFormInitial;
+  sourceDocumentId?: string;
+}) {
   const { user } = useAuth();
-  const [name, setName] = useState("");
-  const [dosage, setDosage] = useState("");
+  const [name, setName] = useState(initial?.name ?? "");
+  const [dosage, setDosage] = useState(initial?.dosage ?? "");
   const [frequency, setFrequency] = useState<MedicationFrequency>("once_daily");
   const [times, setTimes] = useState<string[]>(["09:00"]);
-  const [instructions, setInstructions] = useState("");
+  const [instructions, setInstructions] = useState(initial?.instructions ?? "");
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [busy, setBusy] = useState(false);
 
@@ -54,6 +68,7 @@ export function MedicationForm({ onDone }: { onDone: () => void }) {
         endDate: null,
         active: true,
         color: `hsl(${stringToHue(name)}, 55%, 52%)`,
+        sourceDocumentId: sourceDocumentId ?? null,
       });
       onDone();
     } finally {

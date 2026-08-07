@@ -20,8 +20,10 @@ import { db } from "./client";
 import type {
   ChatMessage,
   ChatThread,
+  HealthDocument,
   HealthInsight,
   JournalEntry,
+  LabResult,
   Medication,
   SymptomCheck,
   UserProfile,
@@ -214,6 +216,66 @@ export async function getRecentJournalOnce(uid: string, max = 30): Promise<Journ
   const q = query(collection(db, "users", uid, "journal"), orderBy("date", "desc"), limit(max));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as JournalEntry));
+}
+
+// --------------------------------------------------------------- documents
+/** Creates the Firestore document with the file stored inline as base64 (status: "processing"). */
+export async function createHealthDocument(
+  uid: string,
+  data: { fileName: string; fileBase64: string; mimeType: string; sizeBytes: number }
+): Promise<string> {
+  const docRef = await addDoc(collection(db, "users", uid, "documents"), {
+    fileName: data.fileName,
+    fileBase64: data.fileBase64,
+    mimeType: data.mimeType,
+    sizeBytes: data.sizeBytes,
+    status: "processing",
+    extraction: null,
+    error: null,
+    uploadedAt: now(),
+  });
+  return docRef.id;
+}
+
+export async function updateHealthDocument(uid: string, docId: string, patch: Partial<HealthDocument>) {
+  await updateDoc(doc(db, "users", uid, "documents", docId), patch);
+}
+
+export async function deleteHealthDocument(uid: string, docId: string) {
+  await deleteDoc(doc(db, "users", uid, "documents", docId));
+}
+
+export function subscribeHealthDocuments(uid: string, cb: (d: HealthDocument[]) => void, max = 50): Unsubscribe {
+  const q = query(collection(db, "users", uid, "documents"), orderBy("uploadedAt", "desc"), limit(max));
+  return onSnapshot(q, (snap) => {
+    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() } as HealthDocument)));
+  });
+}
+
+export function subscribeHealthDocument(uid: string, docId: string, cb: (d: HealthDocument | null) => void): Unsubscribe {
+  return onSnapshot(doc(db, "users", uid, "documents", docId), (snap) => {
+    cb(snap.exists() ? ({ id: snap.id, ...snap.data() } as HealthDocument) : null);
+  });
+}
+
+// -------------------------------------------------------------- lab results
+export async function addLabResult(uid: string, data: Omit<LabResult, "id" | "createdAt">) {
+  const ref = await addDoc(collection(db, "users", uid, "labResults"), {
+    ...data,
+    createdAt: now(),
+  });
+  return ref.id;
+}
+
+export async function deleteLabResult(uid: string, id: string) {
+  await deleteDoc(doc(db, "users", uid, "labResults", id));
+}
+
+export function subscribeLabResults(uid: string, cb: (r: LabResult[]) => void, max = 200): Unsubscribe {
+  const q = query(collection(db, "users", uid, "labResults"), orderBy("recordedAt", "desc"), limit(max));
+  return onSnapshot(q, (snap) => {
+    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() } as LabResult)));
+  });
 }
 
 export { serverTimestamp };
