@@ -40,9 +40,60 @@ export function Footer() {
             professional medical advice, diagnosis, or treatment. Always seek the advice of a
             qualified clinician, and call your local emergency number for emergencies.
           </p>
-          <p>© {new Date().getFullYear()} Vitalis. Built as a demonstration product.</p>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <p>© {new Date().getFullYear()} Vitalis. Built as a demonstration product.</p>
+            <a
+              className="powered-by-vybex"
+              href="https://vybex-dev.vercel.app"
+              target="_blank"
+              rel="noopener"
+            >
+              Powered by <span className="pbv-wordmark">VYBEX</span>
+            </a>
+          </div>
         </div>
       </div>
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        .powered-by-vybex {
+          text-decoration: none;
+          color: inherit;
+          white-space: nowrap;
+          flex: none;
+        }
+        .powered-by-vybex:hover {
+          color: rgb(255 255 255 / 0.7);
+        }
+        .powered-by-vybex .pbv-wordmark {
+          font-weight: 700;
+          letter-spacing: 0.01em;
+          background-image: linear-gradient(
+            135deg,
+            oklch(0.65 0.22 295) 0%,
+            oklch(0.72 0.22 340) 30%,
+            oklch(0.85 0.16 200) 60%,
+            oklch(0.88 0.18 130) 100%
+          );
+          background-size: 200% 200%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: vybex-holo-shift 8s ease-in-out infinite;
+        }
+        @keyframes vybex-holo-shift {
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+      `,
+        }}
+      />
     </footer>
   );
 }

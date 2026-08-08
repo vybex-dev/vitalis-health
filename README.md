@@ -3,7 +3,7 @@
 Vitalis is a full-stack personal health tracking app: log vitals, medications,
 symptoms, and journal entries, then get plain-language guidance from an AI
 copilot — fast answers via **Groq (Llama 3.3 70B)**, or a more thorough
-**Deep analysis** mode via **Gemini 2.5 Flash**. It ships with an interactive
+**Deep analysis** mode via **Gemini 3.5 Flash**. It ships with an interactive
 3D symptom checker (Three.js), realtime charts, and a from-scratch design
 system — not a template.
 
@@ -16,17 +16,17 @@ system — not a template.
 
 ## Features
 
-| Area | What it does |
-|---|---|
-| **AI Copilot** | Two-speed chat: instant answers via Groq, or "Deep analysis" via Gemini 2.5 Flash. Threaded conversation history stored per user. Streams token-by-token. |
-| **Symptom Checker** | Interactive 3D body map (raycasting on a procedural Three.js humanoid) → structured triage via Gemini, returning an urgency level, possible factors, red flags, and self-care tips — always non-diagnostic. |
-| **Documents** | Upload a lab report or prescription (PDF/photo, compressed client-side to fit Firestore's per-document limit) — Gemini 2.5 Flash reads it directly (no OCR library, no object storage service needed) and extracts test results or medications into an editable review screen. Nothing saves to your health record until you confirm it. |
-| **Vitals** | Log blood pressure, heart rate, weight, glucose, SpO₂, sleep, steps, temperature. Realtime line charts (Recharts) per type. |
-| **Medications** | Dosage, frequency, schedule, one-tap "mark as taken," archive/restore. |
-| **Journal** | Daily mood + symptom + note logging, with an AI-generated reflection/summary. |
-| **Insights** | On-demand AI weekly summaries synthesized from logged vitals + journal data. |
-| **Emergency access** | Persistent emergency button (tel: links to 911 and the user's saved emergency contact) available on every authenticated screen. |
-| **3D & motion** | A heartbeat-synced "Pulse Orb" hero (Three.js + react-three-fiber), a dashboard "Health Orb," and Framer Motion throughout. |
+| Area                 | What it does                                                                                                                                                                                                                                                                                                                             |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AI Copilot**       | Two-speed chat: instant answers via Groq, or "Deep analysis" via Gemini 3.5 Flash. Threaded conversation history stored per user. Streams token-by-token.                                                                                                                                                                                |
+| **Symptom Checker**  | Interactive 3D body map (raycasting on a procedural Three.js humanoid) → structured triage via Gemini, returning an urgency level, possible factors, red flags, and self-care tips — always non-diagnostic.                                                                                                                              |
+| **Documents**        | Upload a lab report or prescription (PDF/photo, compressed client-side to fit Firestore's per-document limit) — Gemini 3.5 Flash reads it directly (no OCR library, no object storage service needed) and extracts test results or medications into an editable review screen. Nothing saves to your health record until you confirm it. |
+| **Vitals**           | Log blood pressure, heart rate, weight, glucose, SpO₂, sleep, steps, temperature. Realtime line charts (Recharts) per type.                                                                                                                                                                                                              |
+| **Medications**      | Dosage, frequency, schedule, one-tap "mark as taken," archive/restore.                                                                                                                                                                                                                                                                   |
+| **Journal**          | Daily mood + symptom + note logging, with an AI-generated reflection/summary.                                                                                                                                                                                                                                                            |
+| **Insights**         | On-demand AI weekly summaries synthesized from logged vitals + journal data.                                                                                                                                                                                                                                                             |
+| **Emergency access** | Persistent emergency button (tel: links to 911 and the user's saved emergency contact) available on every authenticated screen.                                                                                                                                                                                                          |
+| **3D & motion**      | A heartbeat-synced "Pulse Orb" hero (Three.js + react-three-fiber), a dashboard "Health Orb," and Framer Motion throughout.                                                                                                                                                                                                              |
 
 ## Tech stack
 
@@ -34,7 +34,7 @@ system — not a template.
 - **3D / animation:** three.js, @react-three/fiber, @react-three/drei, Framer Motion
 - **Styling:** Tailwind CSS v4 (CSS-based theme, no config file needed), self-hosted fonts via `@fontsource` (no external font requests at build or runtime)
 - **Auth & database:** Firebase Authentication (email/password + Google) and Firestore (client SDK for reads/writes, Admin SDK only for verifying ID tokens on API routes)
-- **AI:** `groq-sdk` (Llama 3.3 70B, streaming) and `@google/generative-ai` (Gemini 2.5 Flash, streaming + structured JSON output)
+- **AI:** `groq-sdk` (Llama 3.3 70B, streaming) and `@google/generative-ai` (Gemini 3.5 Flash, streaming + structured JSON output)
 - **Charts:** Recharts
 
 ### Why this architecture
@@ -55,7 +55,7 @@ just without a separate storage service: the browser compresses the file
 it as base64, which gets written straight into the document's Firestore
 record — protected by the same per-user Firestore rules as everything else.
 `/api/documents/extract` receives that base64 directly and sends it to
-Gemini 2.5 Flash's multimodal input; nothing is ever fetched by reference
+Gemini 3.5 Flash's multimodal input; nothing is ever fetched by reference
 from a bucket. This keeps the whole app on Firestore's free Spark plan,
 with no billing account required. The tradeoff is a ~700KB-per-file budget
 (Firestore's 1MB document cap, minus room for base64 overhead and the rest
