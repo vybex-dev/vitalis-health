@@ -102,7 +102,7 @@ export default function SymptomCheckerPage() {
 
       {step === "region" && (
         <Card className="overflow-hidden">
-          <div className="h-96 sm:h-[28rem]">
+          <div className="h-[26rem] sm:h-[30rem]">
             <BodyMap selected={region} onSelect={setRegion} />
           </div>
           <div className="flex items-center justify-between border-t border-border p-4">

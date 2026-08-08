@@ -32,6 +32,13 @@ import type {
 
 const now = () => new Date().toISOString();
 
+/** Firestore rejects `undefined` field values outright. AI-extracted and
+ * optional-form data frequently omits fields rather than nulling them, so
+ * every write path funnels through this before hitting addDoc/updateDoc/setDoc. */
+function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
+}
+
 // ---------------------------------------------------------------- profile
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   const snap = await getDoc(doc(db, "users", uid));
@@ -60,7 +67,7 @@ export async function ensureUserProfile(uid: string, email: string, displayName:
 }
 
 export async function updateUserProfile(uid: string, patch: Partial<UserProfile>) {
-  await updateDoc(doc(db, "users", uid), { ...patch, updatedAt: now() });
+  await updateDoc(doc(db, "users", uid), stripUndefined({ ...patch, updatedAt: now() }));
 }
 
 export function subscribeUserProfile(uid: string, cb: (p: UserProfile | null) => void): Unsubscribe {
@@ -71,10 +78,10 @@ export function subscribeUserProfile(uid: string, cb: (p: UserProfile | null) =>
 
 // ----------------------------------------------------------------- vitals
 export async function addVital(uid: string, data: Omit<VitalReading, "id" | "createdAt">) {
-  const ref = await addDoc(collection(db, "users", uid, "vitals"), {
+  const ref = await addDoc(collection(db, "users", uid, "vitals"), stripUndefined({
     ...data,
     createdAt: now(),
-  });
+  }));
   return ref.id;
 }
 
@@ -91,15 +98,15 @@ export function subscribeVitals(uid: string, cb: (v: VitalReading[]) => void, ma
 
 // ------------------------------------------------------------ medications
 export async function addMedication(uid: string, data: Omit<Medication, "id" | "createdAt">) {
-  const ref = await addDoc(collection(db, "users", uid, "medications"), {
+  const ref = await addDoc(collection(db, "users", uid, "medications"), stripUndefined({
     ...data,
     createdAt: now(),
-  });
+  }));
   return ref.id;
 }
 
 export async function updateMedication(uid: string, id: string, patch: Partial<Medication>) {
-  await updateDoc(doc(db, "users", uid, "medications", id), patch);
+  await updateDoc(doc(db, "users", uid, "medications", id), stripUndefined(patch));
 }
 
 export async function deleteMedication(uid: string, id: string) {
@@ -115,10 +122,10 @@ export function subscribeMedications(uid: string, cb: (m: Medication[]) => void)
 
 // ---------------------------------------------------------------- journal
 export async function addJournalEntry(uid: string, data: Omit<JournalEntry, "id" | "createdAt">) {
-  const ref = await addDoc(collection(db, "users", uid, "journal"), {
+  const ref = await addDoc(collection(db, "users", uid, "journal"), stripUndefined({
     ...data,
     createdAt: now(),
-  });
+  }));
   return ref.id;
 }
 
@@ -135,10 +142,10 @@ export function subscribeJournal(uid: string, cb: (j: JournalEntry[]) => void, m
 
 // ---------------------------------------------------------- symptom checks
 export async function saveSymptomCheck(uid: string, data: Omit<SymptomCheck, "id" | "createdAt">) {
-  const ref = await addDoc(collection(db, "users", uid, "symptomChecks"), {
+  const ref = await addDoc(collection(db, "users", uid, "symptomChecks"), stripUndefined({
     ...data,
     createdAt: now(),
-  });
+  }));
   return ref.id;
 }
 
@@ -151,20 +158,20 @@ export function subscribeSymptomChecks(uid: string, cb: (s: SymptomCheck[]) => v
 
 // ------------------------------------------------------------------ chats
 export async function createChatThread(uid: string, title: string, mode: ChatThread["mode"]) {
-  const ref = await addDoc(collection(db, "users", uid, "chats"), {
+  const ref = await addDoc(collection(db, "users", uid, "chats"), stripUndefined({
     title,
     mode,
     createdAt: now(),
     updatedAt: now(),
-  });
+  }));
   return ref.id;
 }
 
 export async function touchChatThread(uid: string, chatId: string, lastMessage: string) {
-  await updateDoc(doc(db, "users", uid, "chats", chatId), {
+  await updateDoc(doc(db, "users", uid, "chats", chatId), stripUndefined({
     lastMessage,
     updatedAt: now(),
-  });
+  }));
 }
 
 export function subscribeChatThreads(uid: string, cb: (t: ChatThread[]) => void): Unsubscribe {
@@ -175,10 +182,10 @@ export function subscribeChatThreads(uid: string, cb: (t: ChatThread[]) => void)
 }
 
 export async function addChatMessage(uid: string, chatId: string, msg: Omit<ChatMessage, "id" | "createdAt">) {
-  const ref = await addDoc(collection(db, "users", uid, "chats", chatId, "messages"), {
+  const ref = await addDoc(collection(db, "users", uid, "chats", chatId, "messages"), stripUndefined({
     ...msg,
     createdAt: now(),
-  });
+  }));
   return ref.id;
 }
 
@@ -191,10 +198,10 @@ export function subscribeChatMessages(uid: string, chatId: string, cb: (m: ChatM
 
 // --------------------------------------------------------------- insights
 export async function saveInsight(uid: string, data: Omit<HealthInsight, "id" | "generatedAt">) {
-  const ref = await addDoc(collection(db, "users", uid, "insights"), {
+  const ref = await addDoc(collection(db, "users", uid, "insights"), stripUndefined({
     ...data,
     generatedAt: now(),
-  });
+  }));
   return ref.id;
 }
 
@@ -224,7 +231,7 @@ export async function createHealthDocument(
   uid: string,
   data: { fileName: string; fileBase64: string; mimeType: string; sizeBytes: number }
 ): Promise<string> {
-  const docRef = await addDoc(collection(db, "users", uid, "documents"), {
+  const docRef = await addDoc(collection(db, "users", uid, "documents"), stripUndefined({
     fileName: data.fileName,
     fileBase64: data.fileBase64,
     mimeType: data.mimeType,
@@ -233,12 +240,12 @@ export async function createHealthDocument(
     extraction: null,
     error: null,
     uploadedAt: now(),
-  });
+  }));
   return docRef.id;
 }
 
 export async function updateHealthDocument(uid: string, docId: string, patch: Partial<HealthDocument>) {
-  await updateDoc(doc(db, "users", uid, "documents", docId), patch);
+  await updateDoc(doc(db, "users", uid, "documents", docId), stripUndefined(patch));
 }
 
 export async function deleteHealthDocument(uid: string, docId: string) {
@@ -260,10 +267,10 @@ export function subscribeHealthDocument(uid: string, docId: string, cb: (d: Heal
 
 // -------------------------------------------------------------- lab results
 export async function addLabResult(uid: string, data: Omit<LabResult, "id" | "createdAt">) {
-  const ref = await addDoc(collection(db, "users", uid, "labResults"), {
+  const ref = await addDoc(collection(db, "users", uid, "labResults"), stripUndefined({
     ...data,
     createdAt: now(),
-  });
+  }));
   return ref.id;
 }
 
