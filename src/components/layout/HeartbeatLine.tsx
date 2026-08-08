@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { useScroll, useTransform, motion } from "framer-motion";
 
-const D = "M0,24 L530,24 L560,6 L585,42 L610,14 L635,24 L1200,24";
+const D = "M0,24 L565,24 L580,6 L595,42 L605,14 L615,26 L1200,24";
 const VIEW_WIDTH = 1200;
 const VIEW_HEIGHT = 48;
 
