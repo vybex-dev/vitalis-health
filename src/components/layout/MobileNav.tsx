@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/layout/Logo";
 import { NAV_ITEMS } from "@/components/layout/navItems";
 import { useAuth } from "@/lib/auth/AuthContext";
+
+const ParticleField = dynamic(() => import("@/components/three/ParticleField"), { ssr: false });
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -45,40 +48,46 @@ export function MobileNav() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-y-0 left-0 flex w-72 flex-col bg-teal-deep"
+              className="absolute inset-y-0 left-0 flex w-72 flex-col overflow-hidden bg-teal-deep"
             >
-              <div className="flex items-center justify-between px-5 py-5">
-                <Logo dark />
-                <button onClick={() => setOpen(false)} aria-label="Close menu" className="p-1 text-white/70">
-                  <X className="size-5" />
-                </button>
+              <div className="pointer-events-none absolute inset-0 opacity-60">
+                <ParticleField count={90} />
               </div>
-              <nav className="flex-1 px-3">
-                {NAV_ITEMS.map((item) => {
-                  const active = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
-                        active ? "bg-white/10 text-white" : "text-porcelain/60"
-                      )}
-                    >
-                      <item.icon className="size-4.5" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-              <div className="border-t border-white/5 p-4">
-                <button
-                  onClick={() => signOutUser()}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-porcelain/60"
-                >
-                  <LogOut className="size-4" /> Sign out
-                </button>
+
+              <div className="relative z-10 flex h-full flex-col">
+                <div className="flex items-center justify-between px-5 py-5">
+                  <Logo dark />
+                  <button onClick={() => setOpen(false)} aria-label="Close menu" className="p-1 text-white/70">
+                    <X className="size-5" />
+                  </button>
+                </div>
+                <nav className="flex-1 px-3">
+                  {NAV_ITEMS.map((item) => {
+                    const active = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
+                          active ? "bg-white/10 text-white" : "text-porcelain/60"
+                        )}
+                      >
+                        <item.icon className="size-4.5" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+                <div className="border-t border-white/5 p-4">
+                  <button
+                    onClick={() => signOutUser()}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-porcelain/60"
+                  >
+                    <LogOut className="size-4" /> Sign out
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

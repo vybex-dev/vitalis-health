@@ -35,10 +35,10 @@ function Field({ count = 260 }: { count?: number }) {
   );
 }
 
-export default function ParticleField() {
+export default function ParticleField({ count = 260 }: { count?: number }) {
   return (
     <Canvas camera={{ position: [0, 0, 4], fov: 50 }} gl={{ antialias: true, alpha: true }}>
-      <Field />
+      <Field count={count} />
     </Canvas>
   );
 }

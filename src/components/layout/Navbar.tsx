@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { Logo } from "@/components/layout/Logo";
+import { HeartbeatLine } from "@/components/layout/HeartbeatLine";
 
 const LINKS = [
   { href: "#features", label: "Features" },
@@ -18,7 +19,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-porcelain/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 bg-porcelain/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <Link href="/" className="flex items-center gap-2">
           <Logo />
@@ -57,6 +58,8 @@ export function Navbar() {
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
+
+      <HeartbeatLine />
 
       {open && (
         <div className="border-t border-border bg-porcelain px-5 py-4 md:hidden">
