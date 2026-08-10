@@ -18,7 +18,12 @@ function getAdminApp(): App | null {
 
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  // Vercel's env var UI can double-escape newlines or wrap the value in quotes.
+  // We normalise both cases so the key works regardless of how it was pasted.
+  const rawKey = process.env.FIREBASE_PRIVATE_KEY ?? "";
+  const privateKey = rawKey
+    .replace(/^["']|["']$/g, "")   // strip surrounding quotes if any
+    .replace(/\\n/g, "\n");         // convert escaped \n back to real newlines
 
   if (!projectId || !clientEmail || !privateKey) {
     // Admin credentials are optional for local UI development, but required
