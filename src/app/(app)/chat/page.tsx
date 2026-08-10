@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, HeartPulse } from "lucide-react";
+import { Send, HeartPulse, Plus } from "lucide-react";
 import { useChatSession } from "@/hooks/useChatSession";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ModeToggle } from "@/components/chat/ModeToggle";
@@ -49,6 +49,9 @@ export default function ChatPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={startNewThread}>
+            <Plus className="size-4" /> New chat
+          </Button>
           <ModeToggle mode={mode} onChange={setMode} />
           <ThreadHistory
             threads={threads}
