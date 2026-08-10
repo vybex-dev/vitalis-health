@@ -45,7 +45,7 @@ function getClient() {
   return client;
 }
 
-export const GEMINI_MODEL = "gemini-2.0-flash";
+export const GEMINI_MODEL = "gemini-1.5-flash";
 
 export interface SimpleMessage {
   role: "system" | "user" | "assistant";
