@@ -57,7 +57,7 @@ export async function GET() {
     try {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const genAI = new GoogleGenerativeAI(geminiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const result = await model.generateContent("say ok");
       report.gemini_ping = "OK: " + result.response.text().slice(0, 40);
     } catch (err: unknown) {
