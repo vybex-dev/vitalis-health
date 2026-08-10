@@ -285,4 +285,32 @@ export function subscribeLabResults(uid: string, cb: (r: LabResult[]) => void, m
   });
 }
 
+// ------------------------------------------------------------- account deletion
+export async function deleteAllUserData(uid: string) {
+  const collections = ["vitals", "medications", "journal", "symptomChecks", "insights", "documents", "labResults"];
+  
+  for (const col of collections) {
+    const q = query(collection(db, "users", uid, col));
+    const snap = await getDocs(q);
+    for (const d of snap.docs) {
+      await deleteDoc(d.ref);
+    }
+  }
+
+  // Chats and their messages
+  const chatsQ = query(collection(db, "users", uid, "chats"));
+  const chatsSnap = await getDocs(chatsQ);
+  for (const chatDoc of chatsSnap.docs) {
+    const messagesQ = query(collection(db, "users", uid, "chats", chatDoc.id, "messages"));
+    const messagesSnap = await getDocs(messagesQ);
+    for (const msgDoc of messagesSnap.docs) {
+      await deleteDoc(msgDoc.ref);
+    }
+    await deleteDoc(chatDoc.ref);
+  }
+
+  // Delete user profile doc
+  await deleteDoc(doc(db, "users", uid));
+}
+
 export { serverTimestamp };

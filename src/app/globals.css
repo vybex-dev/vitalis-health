@@ -115,6 +115,10 @@ h1, h2, h3, h4, .font-display {
   font-feature-settings: "tnum" 1, "zero" 1;
 }
 
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }

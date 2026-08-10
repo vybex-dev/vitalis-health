@@ -8,6 +8,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { EmergencyButton } from "@/components/ui/EmergencyBanner";
 import { FullPageSpinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { ToastContainer } from "@/components/ui/Toast";
 
 function OnboardingCheck({ children }: { children: React.ReactNode }) {
   const { profile } = useAuth();
@@ -35,6 +36,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">{children}</div>
           </main>
           <EmergencyButton />
+          <ToastContainer />
         </div>
       </OnboardingCheck>
     </AuthGuard>

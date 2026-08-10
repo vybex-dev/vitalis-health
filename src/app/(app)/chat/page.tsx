@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send, HeartPulse, Plus } from "lucide-react";
 import { useChatSession } from "@/hooks/useChatSession";
 import { MessageBubble } from "@/components/chat/MessageBubble";
@@ -31,26 +31,47 @@ export default function ChatPage() {
     bottomRef,
   } = useChatSession();
   const [input, setInput] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [input]);
 
   function handleSend(text?: string) {
     const value = (text ?? input).trim();
     if (!value) return;
     setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     send(value);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   }
 
   return (
     <div className="flex h-[calc(100vh-7.5rem)] flex-col md:h-[calc(100vh-4rem)]">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-xl font-semibold text-ink sm:text-2xl">AI Copilot</h1>
-          <p className="text-sm text-ink-soft">
+          <p className="text-xs sm:text-sm text-ink-soft">
             {mode === "quick" ? "Quick mode — instant answers via Groq." : "Deep analysis — thorough reasoning via Gemini."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={startNewThread}>
-            <Plus className="size-4" /> New chat
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={startNewThread} className="shrink-0">
+            <Plus className="size-4" />
+            <span>
+              New<span className="hidden sm:inline"> chat</span>
+            </span>
           </Button>
           <ModeToggle mode={mode} onChange={setMode} />
           <ThreadHistory
@@ -79,7 +100,7 @@ export default function ChatPage() {
                 <button
                   key={s}
                   onClick={() => handleSend(s)}
-                  className="rounded-xl border border-border bg-porcelain-2/50 p-3 text-left text-xs text-ink-2 hover:border-coral/40 hover:bg-coral-light/40"
+                  className="rounded-xl border border-border bg-porcelain-2/50 p-3 text-left text-xs text-ink-2 hover:border-coral/40 hover:bg-coral-light/40 transition-colors"
                 >
                   {s}
                 </button>
@@ -89,10 +110,15 @@ export default function ChatPage() {
         ) : (
           <div className="flex flex-col gap-5">
             {messages.map((m) => (
-              <MessageBubble key={m.id} role={m.role === "assistant" ? "assistant" : "user"} content={m.content} />
+              <MessageBubble
+                key={m.id}
+                role={m.role === "assistant" ? "assistant" : "user"}
+                content={m.content}
+                createdAt={m.createdAt}
+              />
             ))}
             {streamingText && <MessageBubble role="assistant" content={streamingText} streaming />}
-            {sending && !streamingText && <MessageBubble role="assistant" content="Thinking…" streaming />}
+            {sending && !streamingText && <MessageBubble role="assistant" content="" streaming />}
             <div ref={bottomRef} />
           </div>
         )}
@@ -105,15 +131,18 @@ export default function ChatPage() {
           e.preventDefault();
           handleSend();
         }}
-        className="mt-3 flex items-center gap-2"
+        className="mt-3 flex items-end gap-2"
       >
-        <input
+        <textarea
+          ref={textareaRef}
+          rows={1}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask the copilot anything about your health…"
-          className="h-12 flex-1 rounded-full border border-border-strong bg-white px-4 text-sm text-ink outline-none focus:border-coral"
+          onKeyDown={handleKeyDown}
+          placeholder="Ask the copilot anything about your health… (Shift+Enter for newline)"
+          className="min-h-[48px] max-h-[120px] resize-none py-3 flex-1 rounded-2xl border border-border-strong bg-white px-4 text-sm text-ink outline-none focus:border-coral"
         />
-        <Button type="submit" size="md" loading={sending} disabled={!input.trim()}>
+        <Button type="submit" size="md" loading={sending} disabled={!input.trim()} className="h-12 shrink-0">
           <Send className="size-4" />
         </Button>
       </form>
