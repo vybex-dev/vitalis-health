@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI, type Content } from "@google/generative-ai";
-
 /**
  * Gemini's `responseMimeType: "application/json"` mode is reliable but not
  * airtight — long generations can get cut off at the output token limit
@@ -11,7 +10,10 @@ import { GoogleGenerativeAI, type Content } from "@google/generative-ai";
 function safeJSONParse<T>(raw: string): T {
   let text = raw.trim();
   if (text.startsWith("```")) {
-    text = text.replace(/^```(json)?\s*/i, "").replace(/```\s*$/, "").trim();
+    text = text
+      .replace(/^```(json)?\s*/i, "")
+      .replace(/```\s*$/, "")
+      .trim();
   }
   try {
     return JSON.parse(text) as T;
@@ -45,7 +47,7 @@ function getClient() {
   return client;
 }
 
-export const GEMINI_MODEL = "gemini-flash-latest";
+export const GEMINI_MODEL = "gemini-3.6-flash";
 
 export interface SimpleMessage {
   role: "system" | "user" | "assistant";

@@ -16,15 +16,25 @@ import { MoodHeatmap } from "@/components/journal/MoodHeatmap";
 import { formatDate } from "@/lib/utils";
 import { toast } from "@/store/toastStore";
 import type { JournalEntry } from "@/types";
+import { Flame } from "lucide-react";
 
-const MOOD_EMOJI: Record<number, string> = { 1: "😞", 2: "🙁", 3: "😐", 4: "🙂", 5: "😄" };
+const MOOD_EMOJI: Record<number, string> = {
+  1: "😞",
+  2: "🙁",
+  3: "😐",
+  4: "🙂",
+  5: "😄",
+};
 
 function groupEntriesByMonth(entries: JournalEntry[]) {
   const groups = new Map<string, JournalEntry[]>();
 
   entries.forEach((entry) => {
     const d = new Date(entry.date);
-    const monthKey = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const monthKey = d.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
     const list = groups.get(monthKey) || [];
     list.push(entry);
     groups.set(monthKey, list);
@@ -57,7 +67,8 @@ function computeJournalStreak(journal: JournalEntry[]) {
     }
   }
 
-  const last7Days: { dayName: string; logged: boolean; isToday: boolean }[] = [];
+  const last7Days: { dayName: string; logged: boolean; isToday: boolean }[] =
+    [];
   const days = ["S", "M", "T", "W", "T", "F", "S"];
 
   for (let i = 6; i >= 0; i--) {
@@ -78,7 +89,9 @@ export default function JournalPage() {
   const { user, getIdToken } = useAuth();
   const { entries, loading } = useJournal();
   const [formOpen, setFormOpen] = useState(false);
-  const [summary, setSummary] = useState<Awaited<ReturnType<typeof summarizeJournal>> | null>(null);
+  const [summary, setSummary] = useState<Awaited<
+    ReturnType<typeof summarizeJournal>
+  > | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,7 +105,8 @@ export default function JournalPage() {
       setSummary(result);
       toast.success("AI reflection generated!");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Couldn't summarize right now.";
+      const msg =
+        err instanceof Error ? err.message : "Couldn't summarize right now.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -117,8 +131,12 @@ export default function JournalPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink">Journal</h1>
-          <p className="mt-1 text-sm text-ink-soft">A few seconds a day builds a picture worth bringing to appointments.</p>
+          <h1 className="font-display text-2xl font-semibold text-ink">
+            Journal
+          </h1>
+          <p className="mt-1 text-sm text-ink-soft">
+            A few seconds a day builds a picture worth bringing to appointments.
+          </p>
         </div>
         <Button onClick={() => setFormOpen(true)}>
           <Plus className="size-4" /> New entry
@@ -130,17 +148,23 @@ export default function JournalPage() {
       <Card className="flex items-center justify-between gap-4 p-5">
         <div className="flex items-center gap-3.5">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-coral-light/30">
-            <span style={{ fontSize: `${Math.min(24 + streak * 2, 48)}px` }}>🔥</span>
+            <span style={{ fontSize: `${Math.min(24 + streak * 2, 48)}px` }}>
+              <Flame className="size-6 text-coral" />
+            </span>
           </div>
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-data text-2xl font-semibold text-ink">{streak}</span>
+              <span className="font-data text-2xl font-semibold text-ink">
+                {streak}
+              </span>
               <span className="text-xs font-medium text-ink-soft uppercase tracking-wide">
                 Day streak
               </span>
             </div>
             <p className="text-xs text-ink-soft">
-              {streak > 0 ? "Keep journaling daily!" : "Write a journal entry today!"}
+              {streak > 0
+                ? "Keep journaling daily!"
+                : "Write a journal entry today!"}
             </p>
           </div>
         </div>
@@ -148,14 +172,16 @@ export default function JournalPage() {
         <div className="flex items-center gap-1.5 sm:gap-2">
           {last7Days.map((d, idx) => (
             <div key={idx} className="flex flex-col items-center gap-1">
-              <span className="text-[10px] font-medium text-ink-soft">{d.dayName}</span>
+              <span className="text-[10px] font-medium text-ink-soft">
+                {d.dayName}
+              </span>
               <div
                 className={`size-6 rounded-full flex items-center justify-center text-[10px] font-medium transition-colors ${
                   d.logged
                     ? "bg-sage text-white"
                     : d.isToday
-                    ? "border-2 border-dashed border-coral text-coral"
-                    : "bg-porcelain-2 text-ink-soft"
+                      ? "border-2 border-dashed border-coral text-coral"
+                      : "bg-porcelain-2 text-ink-soft"
                 }`}
               >
                 {d.logged ? "✓" : ""}
@@ -169,25 +195,39 @@ export default function JournalPage() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-coral" />
-            <h2 className="font-display text-base font-semibold text-ink">AI reflection</h2>
+            <h2 className="font-display text-base font-semibold text-ink">
+              AI reflection
+            </h2>
           </div>
-          <Button size="sm" variant="outline" onClick={handleSummarize} loading={busy} disabled={entries.length === 0}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSummarize}
+            loading={busy}
+            disabled={entries.length === 0}
+          >
             Summarize recent entries
           </Button>
         </div>
         {error && <p className="mt-3 text-sm text-alert">{error}</p>}
         {summary && (
           <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
-            <p className="text-sm leading-relaxed text-ink-2">{summary.summary}</p>
+            <p className="text-sm leading-relaxed text-ink-2">
+              {summary.summary}
+            </p>
             <p className="text-sm text-ink-soft">
-              <span className="font-medium text-ink-2">Mood trend:</span> {summary.moodTrend}
+              <span className="font-medium text-ink-2">Mood trend:</span>{" "}
+              {summary.moodTrend}
             </p>
             {summary.recurringSymptoms.length > 0 && (
               <p className="text-sm text-ink-soft">
-                <span className="font-medium text-ink-2">Recurring:</span> {summary.recurringSymptoms.join(", ")}
+                <span className="font-medium text-ink-2">Recurring:</span>{" "}
+                {summary.recurringSymptoms.join(", ")}
               </p>
             )}
-            <p className="rounded-xl bg-sage-light p-3 text-sm text-sage-dark">{summary.suggestion}</p>
+            <p className="rounded-xl bg-sage-light p-3 text-sm text-sage-dark">
+              {summary.suggestion}
+            </p>
           </div>
         )}
       </Card>
@@ -204,7 +244,10 @@ export default function JournalPage() {
             icon={BookOpen}
             title="No journal entries yet"
             description="Start logging your daily mood, symptoms, and thoughts."
-            action={{ label: "Create first entry", onClick: () => setFormOpen(true) }}
+            action={{
+              label: "Create first entry",
+              onClick: () => setFormOpen(true),
+            }}
           />
         )}
         <div className="flex flex-col gap-6">
@@ -219,12 +262,19 @@ export default function JournalPage() {
               </div>
               <div className="flex flex-col gap-3">
                 {groupEntries.map((e) => (
-                  <Card key={e.id} className="flex items-start gap-4 p-4 transition-shadow hover:shadow-[var(--shadow-card)]">
+                  <Card
+                    key={e.id}
+                    className="flex items-start gap-4 p-4 transition-shadow hover:shadow-[var(--shadow-card)]"
+                  >
                     <span className="text-2xl">{MOOD_EMOJI[e.mood]}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-ink">
-                          {formatDate(e.date, { weekday: "short", month: "short", day: "numeric" })}
+                          {formatDate(e.date, {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}
                         </p>
                         <button
                           onClick={() => handleDelete(e.id)}
@@ -235,9 +285,13 @@ export default function JournalPage() {
                         </button>
                       </div>
                       {e.symptoms.length > 0 && (
-                        <p className="mt-1 text-xs text-ink-soft">Symptoms: {e.symptoms.join(", ")}</p>
+                        <p className="mt-1 text-xs text-ink-soft">
+                          Symptoms: {e.symptoms.join(", ")}
+                        </p>
                       )}
-                      {e.notes && <p className="mt-1.5 text-sm text-ink-2">{e.notes}</p>}
+                      {e.notes && (
+                        <p className="mt-1.5 text-sm text-ink-2">{e.notes}</p>
+                      )}
                     </div>
                   </Card>
                 ))}
@@ -247,7 +301,11 @@ export default function JournalPage() {
         </div>
       </div>
 
-      <Modal open={formOpen} onClose={() => setFormOpen(false)} title="New journal entry">
+      <Modal
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        title="New journal entry"
+      >
         <JournalEntryForm onDone={() => setFormOpen(false)} />
       </Modal>
     </div>
