@@ -206,4 +206,8 @@ limiter.
 
 ## License
 
-Built as a demonstration product. Use it as a starting point for your own project.
+Copyright (c) 2026 Harsh Yadav. All Rights Reserved.
+
+This is proprietary software. No part of this repository may be copied,
+modified, distributed, or used without prior written permission from the
+author. See [LICENSE](./LICENSE) for full terms.
