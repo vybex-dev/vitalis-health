@@ -47,7 +47,8 @@ function getClient() {
   return client;
 }
 
-export const GEMINI_MODEL = "gemini-3.6-flash";
+// Override with GEMINI_MODEL in the environment (e.g. "gemini-3.8-flash") without a code change.
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
 export interface SimpleMessage {
   role: "system" | "user" | "assistant";
@@ -68,7 +69,7 @@ function toGeminiHistory(messages: SimpleMessage[]): {
   return { systemInstruction, history };
 }
 
-/** Streams a chat completion from Gemini 2.5 Flash for the "Deep analysis" copilot mode. */
+/** Streams a chat completion from Gemini (see GEMINI_MODEL) for the "Deep analysis" copilot mode. */
 export async function* streamGeminiChat(messages: SimpleMessage[]) {
   const genAI = getClient();
   const { systemInstruction, history } = toGeminiHistory(messages);
@@ -89,7 +90,7 @@ export async function* streamGeminiChat(messages: SimpleMessage[]) {
 }
 
 /**
- * Calls Gemini 2.5 Flash with an inline file (image or PDF, base64) plus a
+ * Calls Gemini with an inline file (image or PDF, base64) plus a
  * text instruction, and parses the response as JSON. Used for document
  * extraction (lab reports / prescriptions), which supports Gemini's native
  * multimodal input — no separate OCR step needed.
@@ -119,13 +120,14 @@ export async function generateGeminiJSONFromFile<T>(
 }
 
 /**
- * Calls Gemini 2.5 Flash and parses the response as JSON. Used for the
- * symptom checker and insight generator, which both request strict JSON
- * output via their system prompts.
+ * Calls Gemini and parses the response as JSON. Used for the symptom checker,
+ * insights, report explanations and visit-prep questions, which all request
+ * strict JSON. Callers that validate with zod should pass T = unknown.
  */
 export async function generateGeminiJSON<T>(
   systemInstruction: string,
   userContent: string,
+  opts: { maxOutputTokens?: number; temperature?: number } = {},
 ): Promise<T> {
   const genAI = getClient();
   const model = genAI.getGenerativeModel({
@@ -133,8 +135,8 @@ export async function generateGeminiJSON<T>(
     systemInstruction,
     generationConfig: {
       responseMimeType: "application/json",
-      temperature: 0.3,
-      maxOutputTokens: 4096,
+      temperature: opts.temperature ?? 0.3,
+      maxOutputTokens: opts.maxOutputTokens ?? 4096,
     },
   });
   const result = await model.generateContent(userContent);

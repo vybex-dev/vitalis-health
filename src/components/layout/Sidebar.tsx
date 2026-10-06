@@ -16,7 +16,7 @@ export function Sidebar() {
   const { user, profile, signOutUser } = useAuth();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col overflow-hidden border-r border-white/5 bg-teal-deep md:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col overflow-hidden border-r border-white/5 bg-teal-deep md:flex print:!hidden">
       <div className="pointer-events-none absolute inset-0 opacity-60">
         <ParticleField count={90} />
       </div>

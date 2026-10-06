@@ -21,7 +21,7 @@ export function MobileNav() {
 
   return (
     <>
-      <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-porcelain/90 px-4 backdrop-blur md:hidden">
+      <div className="sticky top-0 z-30 print:hidden flex h-14 items-center justify-between border-b border-border bg-porcelain/90 px-4 backdrop-blur md:hidden">
         <Link href="/dashboard">
           <Logo />
         </Link>

@@ -8,18 +8,19 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { GoogleGlyph } from "@/components/auth/GoogleGlyph";
+import { DemoButton } from "@/components/auth/DemoButton";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loading, signInWithEmail, signInWithGoogle, configured } = useAuth();
+  const { user, loading, demoLoading, signInWithEmail, signInWithGoogle, configured } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) router.replace("/dashboard");
-  }, [user, loading, router]);
+    if (!loading && user && !demoLoading) router.replace("/dashboard");
+  }, [user, loading, demoLoading, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -94,6 +95,8 @@ export default function LoginPage() {
       <Button variant="outline" className="w-full justify-center" onClick={handleGoogle} loading={busy}>
         <GoogleGlyph /> Continue with Google
       </Button>
+
+      <DemoButton className="mt-3" />
 
       <p className="mt-6 text-center text-sm text-ink-soft">
         New to Vitalis?{" "}

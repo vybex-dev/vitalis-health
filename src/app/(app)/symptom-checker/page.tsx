@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { UrgencyBadge } from "@/components/symptom/UrgencyBadge";
+import { useEmergencyRegion } from "@/hooks/useEmergencyRegion";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useSymptomChecks } from "@/hooks/useSymptomChecks";
 import { runSymptomCheck } from "@/lib/aiClient";
@@ -36,6 +37,7 @@ export default function SymptomCheckerPage() {
   const [freeText, setFreeText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emergencyRegion] = useEmergencyRegion();
   const [result, setResult] = useState<SymptomCheck["assessment"] | null>(null);
 
   const regionLabel = BODY_REGIONS.find((r) => r.id === region)?.label;
@@ -199,13 +201,18 @@ export default function SymptomCheckerPage() {
             </div>
 
             {result.urgency === "emergency" && (
-              <a href="tel:911" className="mb-4 block">
+              <a href={`tel:${emergencyRegion.emergency}`} className="mb-4 block">
                 <Button variant="danger" className="w-full justify-center">
-                  <Phone className="size-4" /> Call emergency services now
+                  <Phone className="size-4" /> Call {emergencyRegion.emergency} now
                 </Button>
               </a>
             )}
 
+            {result.safetyOverride && (
+              <p className="mb-3 text-xs text-alert-dark">
+                A built-in safety rule raised this to an emergency based on what you reported. It doesn&apos;t depend on the AI.
+              </p>
+            )}
             <p className="text-sm leading-relaxed text-ink-2">{result.summary}</p>
 
             {result.possibleFactors.length > 0 && (

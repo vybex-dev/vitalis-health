@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Line,
   LineChart,
@@ -25,7 +26,8 @@ export function VitalsChart({
 }) {
   const meta = VITAL_META[type];
 
-  const now = Date.now();
+  // Captured once on mount: calling Date.now() during render is impure (and re-running it would shift the window mid-interaction).
+  const [now] = useState(() => Date.now());
   const rangeMs =
     dateRange === "7d"
       ? 7 * 86400000

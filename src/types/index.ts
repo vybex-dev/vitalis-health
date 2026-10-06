@@ -1,3 +1,5 @@
+import type { LabVerification } from "@/lib/labs/referenceRange";
+
 // Shared domain types for Vitalis. Firestore documents are typed loosely
 // (timestamps arrive as Firestore Timestamp on the server and are normalized
 // to ISO strings on the client — see lib/firebase/converters.ts).
@@ -142,6 +144,8 @@ export interface SymptomCheck {
     redFlags: string[];
     selfCareTips: string[];
     disclaimer: string;
+    /** True when deterministic safety rules raised the urgency above what the model said (or the model was unavailable). */
+    safetyOverride?: boolean;
   };
   createdAt: string;
 }
@@ -174,6 +178,8 @@ export interface ExtractedLabValue {
   unit?: string;
   referenceRange?: string;
   flag: "low" | "normal" | "high" | "unknown";
+  /** Added server-side: result of re-checking the flag against the printed range in code. */
+  verification?: LabVerification;
 }
 
 export interface ExtractedMedication {
@@ -190,6 +196,27 @@ export interface DocumentExtraction {
   medications: ExtractedMedication[];
   lowConfidenceWarning: boolean;
   disclaimer: string;
+  /** Added server-side after re-checking each flag against the printed reference range. */
+  verificationSummary?: { total: number; verified: number; corrected: number; unverifiable: number };
+}
+
+// Plain-language explanation of a lab report (generated on demand, in the user's language).
+export type ReadingLevel = "simple" | "standard";
+
+export interface ReportExplanation {
+  language: string; // BCP-47-ish code, e.g. "en", "hi", "es"
+  readingLevel: ReadingLevel;
+  headline: string;
+  keyPoints: string[];
+  items: {
+    testName: string;
+    whatItMeasures: string;
+    whatItMeans: string; // hedged, non-diagnostic, only about the flag already computed in code
+    questionsToAsk: string[];
+  }[];
+  questionsForDoctor: string[];
+  whenToSeekCareSooner: string;
+  generatedAt: string;
 }
 
 export interface HealthDocument {
@@ -200,6 +227,7 @@ export interface HealthDocument {
   sizeBytes: number;
   status: DocumentStatus;
   extraction?: DocumentExtraction | null;
+  explanation?: ReportExplanation | null;
   error?: string | null;
   uploadedAt: string;
   reviewedAt?: string | null;

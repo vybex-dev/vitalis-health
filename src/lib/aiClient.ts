@@ -1,4 +1,5 @@
-import type { VitalReading, JournalEntry, SymptomCheck, HealthInsight, DocumentExtraction } from "@/types";
+import type { VitalReading, JournalEntry, SymptomCheck, HealthInsight, DocumentExtraction, ExtractedLabValue, ReadingLevel, ReportExplanation } from "@/types";
+import type { VisitBrief } from "@/lib/visitBrief";
 
 async function postJSON<T>(url: string, token: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -49,4 +50,18 @@ export async function extractDocument(
   input: { fileBase64: string; mimeType: string }
 ): Promise<DocumentExtraction> {
   return postJSON("/api/documents/extract", token, input);
+}
+
+export async function explainReport(
+  token: string,
+  input: { labValues: ExtractedLabValue[]; language: string; readingLevel: ReadingLevel }
+): Promise<ReportExplanation> {
+  return postJSON("/api/documents/explain", token, input);
+}
+
+export async function generateVisitQuestions(
+  token: string,
+  brief: VisitBrief
+): Promise<{ questions: string[]; topicsToRaise: string[] }> {
+  return postJSON("/api/visit-prep/questions", token, { brief });
 }

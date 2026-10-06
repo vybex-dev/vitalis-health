@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Send, HeartPulse, Plus } from "lucide-react";
 import { useChatSession } from "@/hooks/useChatSession";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ModeToggle } from "@/components/chat/ModeToggle";
 import { ThreadHistory } from "@/components/chat/ThreadHistory";
 import { Button } from "@/components/ui/Button";
+import { EmergencyNotice } from "@/components/safety/EmergencyNotice";
+import { detectRedFlags } from "@/lib/safety/redFlags";
 
 const SUGGESTIONS = [
   "What could cause a dull headache that comes back every afternoon?",
@@ -32,6 +34,8 @@ export default function ChatPage() {
   } = useChatSession();
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Client-side, zero-latency, no-network check: the notice appears as the user types.
+  const liveFlags = useMemo(() => detectRedFlags(input), [input]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -125,6 +129,7 @@ export default function ChatPage() {
       </div>
 
       {error && <p className="mt-2 text-sm text-alert">{error}</p>}
+      <EmergencyNotice flags={liveFlags} />
 
       <form
         onSubmit={(e) => {

@@ -2,6 +2,8 @@ import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { streamGeminiChat, geminiAvailable, type SimpleMessage } from "@/lib/ai/gemini";
 import { COPILOT_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { anonIpLimited } from "@/lib/api/guard";
+import { triageChatMessage } from "@/lib/safety/guard";
 
 export const runtime = "nodejs";
 
@@ -21,6 +23,9 @@ export async function POST(request: Request) {
   if (!auth) {
     return Response.json({ error: "Sign in required." }, { status: 401 });
   }
+
+  const anonBlock = anonIpLimited(request, auth, "chat-deep");
+  if (anonBlock) return anonBlock;
 
   const { allowed, resetInMs } = checkRateLimit(`chat-deep:${auth.uid}`, 15, 10 * 60 * 1000);
   if (!allowed) {
@@ -46,9 +51,15 @@ export async function POST(request: Request) {
     return Response.json({ error: "No messages provided." }, { status: 400 });
   }
 
-  const systemPrompt = context
+  // Deterministic safety check BEFORE any model call: an emergency notice is streamed
+  // first, so urgent guidance never depends on the model (or its API) behaving.
+  const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const triage = triageChatMessage(request, lastUser);
+
+  const systemPromptBase = context
     ? `${COPILOT_SYSTEM_PROMPT}\n\nYou are in "Deep analysis" mode: take extra care to reason through the user's logged context below before answering, and be more thorough than a quick reply.\n\nContext the user has logged in Vitalis (use only if relevant, never invent additional data):\n${context}`
     : `${COPILOT_SYSTEM_PROMPT}\n\nYou are in "Deep analysis" mode: be thorough and reason carefully before answering.`;
+  const systemPrompt = systemPromptBase + triage.promptAddendum;
 
   const geminiMessages: SimpleMessage[] = [
     { role: "system", content: systemPrompt },
@@ -59,6 +70,7 @@ export async function POST(request: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        if (triage.preamble) controller.enqueue(encoder.encode(triage.preamble + "\n\n"));
         for await (const chunk of streamGeminiChat(geminiMessages)) {
           controller.enqueue(encoder.encode(chunk));
         }

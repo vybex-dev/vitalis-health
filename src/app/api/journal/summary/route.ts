@@ -2,6 +2,7 @@ import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSON, geminiAvailable } from "@/lib/ai/gemini";
 import { JOURNAL_SUMMARY_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { anonIpLimited } from "@/lib/api/guard";
 import type { JournalEntry } from "@/types";
 
 export const runtime = "nodejs";
@@ -26,6 +27,9 @@ export async function POST(request: Request) {
   }
   const auth = await verifyRequestToken(request);
   if (!auth) return Response.json({ error: "Sign in required." }, { status: 401 });
+
+  const anonBlock = anonIpLimited(request, auth, "journal-summary");
+  if (anonBlock) return anonBlock;
 
   const { allowed, resetInMs } = checkRateLimit(`journal-summary:${auth.uid}`, 8, 30 * 60 * 1000);
   if (!allowed) {

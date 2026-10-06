@@ -53,7 +53,7 @@ export function getAdminDb() {
 }
 
 /** Verifies the `Authorization: Bearer <idToken>` header sent from the client and returns the uid. */
-export async function verifyRequestToken(request: Request): Promise<{ uid: string } | null> {
+export async function verifyRequestToken(request: Request): Promise<{ uid: string; anonymous: boolean } | null> {
   const header = request.headers.get("authorization") || request.headers.get("Authorization");
   if (!header?.startsWith("Bearer ")) return null;
   const idToken = header.slice("Bearer ".length).trim();
@@ -61,7 +61,7 @@ export async function verifyRequestToken(request: Request): Promise<{ uid: strin
 
   try {
     const decoded = await getAdminAuth().verifyIdToken(idToken);
-    return { uid: decoded.uid };
+    return { uid: decoded.uid, anonymous: decoded.firebase?.sign_in_provider === "anonymous" };
   } catch {
     return null;
   }

@@ -9,6 +9,7 @@ import {
   BookHeart,
   Sparkles,
   UserRound,
+  ClipboardList,
 } from "lucide-react";
 
 export interface NavItem {
@@ -26,5 +27,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/documents", label: "Documents", icon: FileUp },
   { href: "/journal", label: "Journal", icon: BookHeart },
   { href: "/insights", label: "Insights", icon: Sparkles },
+  { href: "/visit-prep", label: "Visit Prep", icon: ClipboardList },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];

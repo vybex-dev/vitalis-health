@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { UploadCloud, Loader2 } from "lucide-react";
+import { UploadCloud, Loader2, FileImage } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 
@@ -18,6 +18,12 @@ export function DocumentUploader({ onUploaded }: { onUploaded?: (docId: string) 
     },
     [upload, onUploaded]
   );
+
+  const useSample = useCallback(async () => {
+    const res = await fetch("/samples/sample-lab-report.png");
+    const blob = await res.blob();
+    await handleFile(new File([blob], "sample-lab-report.png", { type: "image/png" }));
+  }, [handleFile]);
 
   return (
     <div>
@@ -64,6 +70,15 @@ export function DocumentUploader({ onUploaded }: { onUploaded?: (docId: string) 
           </p>
         </div>
       </label>
+
+      <button
+        type="button"
+        onClick={useSample}
+        disabled={busy}
+        className="mt-3 inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs font-medium text-ink-2 transition-colors hover:bg-porcelain-2 disabled:opacity-50"
+      >
+        <FileImage className="size-3.5" /> No report handy? Try a sample (fictional) lab report
+      </button>
 
       {error && <p className="mt-3 text-sm text-alert">{error}</p>}
 

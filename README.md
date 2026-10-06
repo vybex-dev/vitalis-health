@@ -1,213 +1,154 @@
-# Vitalis — AI Personal Healthcare Copilot
+# Vitalis: AI healthcare copilot you can trust
 
-Vitalis is a full-stack personal health tracking app: log vitals, medications,
-symptoms, and journal entries, then get plain-language guidance from an AI
-copilot — fast answers via **Groq (Llama 3.3 70B)**, or a more thorough
-**Deep analysis** mode via **Gemini 3.5 Flash**. It ships with an interactive
-3D symptom checker (Three.js), realtime charts, and a from-scratch design
-system — not a template.
+**ForgeHacks 2026 · Track: AI + Healthcare**
+*Prompt: "Build an AI-powered solution that makes healthcare information and interactions clearer, more accessible, or easier to act on."*
 
-> **Vitalis provides general health information and organizational tools. It
-> is not a medical device, does not diagnose conditions, and is not a
-> substitute for professional medical advice, diagnosis, or treatment.**
-> See [Safety & disclaimers](#safety--disclaimers) below.
+> **Try it in 10 seconds:** open the app and click **"Try the demo"**. You land in a populated account for a fictional patient (rising blood pressure, flagged labs, warfarin + ibuprofen). No sign-up. <!-- add your deployed URL here -->
+
+![Architecture](docs/architecture.png)
+
+> Vitalis provides general health information and organizational tools. It is not a medical device, does not diagnose, and is not a substitute for professional medical advice.
 
 ---
 
-## Features
+## The problem
 
-| Area                 | What it does                                                                                                                                                                                                                                                                                                                             |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AI Copilot**       | Two-speed chat: instant answers via Groq, or "Deep analysis" via Gemini 3.5 Flash. Threaded conversation history stored per user. Streams token-by-token.                                                                                                                                                                                |
-| **Symptom Checker**  | Interactive 3D body map (raycasting on a procedural Three.js humanoid) → structured triage via Gemini, returning an urgency level, possible factors, red flags, and self-care tips — always non-diagnostic.                                                                                                                              |
-| **Documents**        | Upload a lab report or prescription (PDF/photo, compressed client-side to fit Firestore's per-document limit) — Gemini 3.5 Flash reads it directly (no OCR library, no object storage service needed) and extracts test results or medications into an editable review screen. Nothing saves to your health record until you confirm it. |
-| **Vitals**           | Log blood pressure, heart rate, weight, glucose, SpO₂, sleep, steps, temperature. Realtime line charts (Recharts) per type.                                                                                                                                                                                                              |
-| **Medications**      | Dosage, frequency, schedule, one-tap "mark as taken," archive/restore.                                                                                                                                                                                                                                                                   |
-| **Journal**          | Daily mood + symptom + note logging, with an AI-generated reflection/summary.                                                                                                                                                                                                                                                            |
-| **Insights**         | On-demand AI weekly summaries synthesized from logged vitals + journal data.                                                                                                                                                                                                                                                             |
-| **Emergency access** | Persistent emergency button (tel: links to 911 and the user's saved emergency contact) available on every authenticated screen.                                                                                                                                                                                                          |
-| **3D & motion**      | A heartbeat-synced "Pulse Orb" hero (Three.js + react-three-fiber), a dashboard "Health Orb," and Framer Motion throughout.                                                                                                                                                                                                              |
+Health information is *technically* available but rarely usable:
 
-## Tech stack
+- A lab report is a table of numbers and letters. People leave appointments unsure what was said, and many can't read the report's language at all.
+- Most people take more than one medicine and have no easy way to know whether two of them clash. Generic chatbots answer from memory, and in medicine a **fluent, confident wrong answer is the worst failure**.
+- Appointments are short. People forget the symptom that mattered, or the trend they noticed three weeks ago.
+- When someone types "chest pain" into an AI app, the response should never depend on whether a language model happens to behave.
 
-- **Framework:** Next.js 16 (App Router, TypeScript), deployed as a single Vercel project (frontend + serverless API routes)
-- **3D / animation:** three.js, @react-three/fiber, @react-three/drei, Framer Motion
-- **Styling:** Tailwind CSS v4 (CSS-based theme, no config file needed), self-hosted fonts via `@fontsource` (no external font requests at build or runtime)
-- **Auth & database:** Firebase Authentication (email/password + Google) and Firestore (client SDK for reads/writes, Admin SDK only for verifying ID tokens on API routes)
-- **AI:** `groq-sdk` (Llama 3.3 70B, streaming) and `@google/generative-ai` (Gemini 3.5 Flash, streaming + structured JSON output)
-- **Charts:** Recharts
+## What Vitalis does differently
 
-### Why this architecture
+Most health-AI projects are a prompt in front of a model. Vitalis puts a **deterministic trust layer around the models**, so every AI output is either *verified by code*, *grounded in a cited source*, or *clearly labelled as unverified*, and the user can see which.
 
-Firestore reads/writes happen straight from the browser using the Firebase
-client SDK, secured by the security rules in `firestore.rules` (every
-document lives under `/users/{uid}/...` and only that user can touch it).
-The **only** thing that needs a server round-trip is anything requiring a
-secret API key — Groq and Gemini calls — so those live in Next.js API routes
-under `src/app/api/*`, each of which verifies the caller's Firebase ID token
-with the Admin SDK before doing anything. This keeps the backend surface
-small, keeps API keys off the client, and still deploys as one Vercel
-project with zero extra infrastructure.
+| Healthcare prompt: clearer | How |
+| --- | --- |
+| **Plain-language report explainer** | Upload or photograph a lab report. Pick one of 9 languages (Hindi, Spanish, Bengali, Tamil, Marathi, French, Portuguese, Arabic, English; RTL supported) and a reading level (simple ≈ 6th grade, or standard). **Read aloud** via the browser's speech synthesis for low-literacy and low-vision users. |
+| **Verified lab flags** | The vision model *transcribes* the report; **code re-computes every low/normal/high flag** from the reference range printed on that report. Disagreements are corrected, shown and explained; ranges that can't be parsed are marked "not auto-checked". |
 
-The same server-only-for-secrets principle applies to uploaded documents,
-just without a separate storage service: the browser compresses the file
-(images are downscaled/re-encoded to fit; PDFs are size-checked) and reads
-it as base64, which gets written straight into the document's Firestore
-record — protected by the same per-user Firestore rules as everything else.
-`/api/documents/extract` receives that base64 directly and sends it to
-Gemini 3.5 Flash's multimodal input; nothing is ever fetched by reference
-from a bucket. This keeps the whole app on Firestore's free Spark plan,
-with no billing account required. The tradeoff is a ~700KB-per-file budget
-(Firestore's 1MB document cap, minus room for base64 overhead and the rest
-of the document's fields) — plenty for a single-page lab report or
-prescription, tight for a long multi-page PDF.
+| Healthcare prompt: more accessible | How |
+| --- | --- |
+| **Works for the moment of need** | Emergency numbers are **region-aware** (911 / 112 / 999 / 000 and national crisis lines) rather than hard-coded to the US. |
+| **No account friction** | One-click anonymous demo session. |
+
+| Healthcare prompt: easier to act on | How |
+| --- | --- |
+| **Visit Prep brief** | Last 30 days on one printable page: current meds, vital trends (fitted slope, out-of-range counts), flagged labs with previous values, repeated symptoms, mood. Copy as text for WhatsApp/email, or print/save as PDF. Data-derived discussion points are **pure rules**; the AI only suggests *questions*. |
+| **FDA-grounded medication safety** | Retrieves real FDA drug-label text (openFDA), finds sentences that name the other drug *or its drug class*, and shows the **verbatim excerpt and source**. The model may only summarise excerpts it was given, and recommendations are fixed templates (the model can never say "stop taking X"). Allergy cross-check is rule-based. |
+
+### Why this is "not just a wrapper"
+
+| Layer | What is deterministic and tested | What the model does |
+| --- | --- | --- |
+| **Emergencies** (`src/lib/safety/redFlags.ts`) | 11 red-flag categories, negation handling, region-aware numbers. Runs **as you type in the browser** and **before** any model call on the server. Symptom-checker urgency is **floored in code** (red flag or severity ≥ 8 ⇒ emergency) and a rule-based emergency result is returned **even if Gemini is down**. | Everything after the notice: supportive follow-up. |
+| **Lab values** (`src/lib/labs/referenceRange.ts`) | Parses real-world range formats (`70-99`, `< 5.7`, `≥60`, `4,500-11,000`, decimal commas), refuses sex-specific/categorical ranges, handles `<0.5`-style qualified values only when safe. | Reads text off the image. |
+| **Drug interactions** (`src/lib/drugs/*`) | Name/salt/dose normalisation, combo-product splitting, 13 drug classes, word-boundary evidence retrieval, label-language classification (contraindicated / avoid / monitor / mentioned), caching, timeouts. | One-sentence plain-language summary of retrieved excerpts. |
+| **Trends & brief** (`src/lib/trends.ts`, `visitBrief.ts`) | Least-squares trend, per-vital stability bands, out-of-range counts, discussion points. | Phrases questions from the facts. |
+| **Abuse protection** (`src/lib/api/guard.ts`) | Per-user limits **plus per-IP limits for anonymous demo sessions**, so spinning up fresh anonymous accounts can't burn the AI quota. | n/a |
+
+**Designed failure modes**
+
+- FDA lookup unavailable → result is labelled **"AI only · unverified"**, never shown as verified.
+- No label mentions the other drug → *"no mention found, that doesn't guarantee they're safe"*, never *"safe"*.
+- Model returns malformed JSON → rejected by zod instead of rendered.
+- Model hallucinates a test that wasn't flagged → filtered out server-side.
 
 ---
 
-## Project structure
+## Evaluation: 54 tests, `npm test`
 
-```
-src/
-  app/
-    page.tsx                 Marketing landing page
-    (auth)/login, signup     Auth pages
-    onboarding/               Post-signup profile wizard
-    (app)/                    Authenticated app shell (sidebar + guards)
-      dashboard, chat, vitals, medications,
-      symptom-checker, documents, documents/[id], journal, insights, profile
-    api/
-      chat/route.ts           Groq streaming chat ("Quick" mode)
-      chat/deep/route.ts      Gemini streaming chat ("Deep analysis" mode)
-      symptom-check/route.ts  Gemini structured JSON triage
-      documents/extract/route.ts  Gemini multimodal extraction (lab reports/prescriptions)
-      insights/weekly/route.ts  Gemini structured JSON weekly insight
-      journal/summary/route.ts  Gemini structured JSON journal reflection
-  components/
-    three/                   PulseOrb, HealthOrb, BodyMap, ParticleField, PulseLine
-    ui/                      Button, Card, Input, Modal, Badge, etc.
-    layout/, landing/, chat/, vitals/, medications/, journal/, symptom/,
-    documents/               DocumentUploader, LabResultsReview, MedicationsExtractionReview
-    dashboard/, auth/
-  lib/
-    firebase/client.ts        Firebase client SDK init (Auth, Firestore)
-    firebase/admin.ts         Firebase Admin SDK init + ID token verification
-    firebase/repo.ts          All Firestore reads/writes + realtime subscriptions
-    ai/groq.ts, ai/gemini.ts  AI provider wrappers
-    ai/systemPrompts.ts       Every prompt sent to the models, with safety framing
-    aiClient.ts, aiContext.ts Client helpers for calling the API routes
-    fileUpload.ts              Client-side image compression / base64 prep for uploads
-    healthScore.ts            Transparent dashboard health-score heuristic
-    rateLimit.ts               Best-effort in-memory rate limiter
-  hooks/                       Realtime Firestore hooks (useVitals, useMedications, …)
-  types/index.ts                Shared domain types
-firestore.rules                 Per-user data isolation rules
-```
+Pure-logic modules ship with a test suite (`tests/`), including a **safety eval set**: 29 real-world emergency phrasings that must trigger (with the right category) and 16 benign / negated / family-history phrasings that must not. The lab-range parser is tested on its own formats **and on the bundled sample report**: code must reproduce every printed H/L flag on the page. Tests are mutation-checked (breaking word-boundary matching or the allergy logic makes them fail). CI runs typecheck, lint, tests and build.
 
----
-
-## Getting started locally
-
-### 1. Install dependencies
+Writing these tests caught three real bugs before shipping: the emergency detector missed "numbness in my **left** arm" and "bleeding **heavily**", and the lab-range logic wrongly called `<0.5` "normal" against a `0.3–1.0` range (it could equally be low).
 
 ```bash
-npm install
-```
-
-### 2. Create a Firebase project
-
-1. Go to the [Firebase console](https://console.firebase.google.com/) → **Add project**.
-2. **Build → Authentication → Get started.** Enable **Email/Password** and **Google** sign-in providers.
-3. **Build → Firestore Database → Create database** (start in production mode — the included rules lock it down). This is the only data store the app uses — including uploaded documents — so there's no need to enable Firebase Storage or upgrade off the free Spark plan.
-4. **Project settings → General → Your apps → Add app → Web.** Copy the `firebaseConfig` values into `.env.local` (see below).
-5. **Project settings → Service accounts → Generate new private key.** This downloads a JSON file — you'll need three fields from it (`project_id`, `client_email`, `private_key`) for the Admin SDK.
-6. Deploy the security rules: either paste `firestore.rules` into **Firestore Database → Rules** in the console and click **Publish**, or with the Firebase CLI:
-   ```bash
-   npm install -g firebase-tools
-   firebase login
-   firebase use --add   # select your project
-   firebase deploy --only firestore:rules
-   ```
-
-### 3. Get free AI API keys
-
-- **Groq:** [console.groq.com/keys](https://console.groq.com/keys) → create a free API key.
-- **Gemini:** [aistudio.google.com/apikey](https://aistudio.google.com/apikey) → create a free API key.
-
-### 4. Configure environment variables
-
-```bash
-cp .env.example .env.local
-```
-
-Fill in every value in `.env.local` — see the comments in that file for exactly where each one comes from. The app will still run and the landing/auth UI will render without them, but sign-in, data storage, and every AI feature require them.
-
-### 5. Run it
-
-```bash
-npm run dev
-```
-
-Visit `http://localhost:3000`.
-
-### 6. Verify the build (optional but recommended before deploying)
-
-```bash
-npm run lint
+npm run check   # typecheck + lint + tests
 npm run build
 ```
 
 ---
 
-## Deploying to Vercel
+## Built during ForgeHacks (Oct 3–10, 2026) vs. pre-existing
 
-1. Push this repository to GitHub (or GitLab/Bitbucket).
-2. In [Vercel](https://vercel.com/new), **Import Project** and select the repo. Vercel auto-detects Next.js — no build config changes needed.
-3. Under **Environment Variables**, add every variable from `.env.example` (same values as your `.env.local`). Do this for all environments (Production, Preview, Development) you plan to use.
-4. Deploy. Vercel builds and hosts both the frontend and the `/api/*` serverless functions from the same project.
-5. Back in the Firebase console, go to **Authentication → Settings → Authorized domains** and add your Vercel domain (e.g. `your-app.vercel.app`) so sign-in works in production.
+Vitalis existed before the hackathon as a health-tracking app with AI chat, a 3D symptom checker and document upload. To comply with the ForgeHacks rules, here is exactly what is **new for this event**:
 
-That's it — no separate backend to deploy. Firestore is your database, Vercel serves the app and the API routes.
+**New**
+- Deterministic emergency red-flag engine, client-side live notice, server pre-LLM triage, urgency floor, model-outage fallback, region-aware emergency numbers (replaced hard-coded 911 in three places)
+- Lab-range parser + code verification of AI-extracted flags, with verified/corrected/unverifiable UI
+- Plain-language, multilingual, reading-level-aware report explainer with read-aloud
+- FDA-label-grounded interaction checker (retrieval, drug classes, evidence UI), rule-based allergy cross-check, labelled fallback
+- Visit Prep brief (trends engine, brief assembly, AI questions, print/copy)
+- One-click demo mode (anonymous auth, seeded fictional patient, bundled sample lab report), per-IP abuse limits
+- 54-test suite, CI workflow, architecture diagram, zod validation on new AI routes
 
----
-
-## Safety & disclaimers
-
-Vitalis is designed with a deliberately cautious AI safety posture, enforced
-in `src/lib/ai/systemPrompts.ts`:
-
-- The copilot never outputs a definitive diagnosis or prescribes/adjusts medication dosages.
-- The symptom checker and every chat mode share an explicit list of emergency "red flag" symptoms (chest pain, stroke signs, severe bleeding, anaphylaxis, suicidal intent, etc.) — when a message plausibly matches, the model is instructed to lead with "seek emergency care now" and the UI surfaces a one-tap call-911 button.
-- Uploaded documents are treated as OCR/transcription only — the model is instructed never to interpret what a lab value "means" medically, only to transcribe it and flag it against the document's own printed reference range. Nothing extracted from a document is saved automatically; the user reviews and edits every row before it's written to their record.
-- All AI responses are framed as general information, with recurring nudges toward professional care.
-- A persistent Emergency button is available throughout the authenticated app.
-
-That said: **this is a demonstration product, not a certified medical
-device, and it is not HIPAA-compliant out of the box.** If you intend to
-handle real patient health information in a regulated context, you would
-additionally need, at minimum: a signed BAA with Firebase/Google Cloud (or a
-HIPAA-eligible hosting stack), audit logging, encryption-at-rest attestation
-review, a formal risk assessment, and legal review — none of which is in
-scope here.
-
-The in-memory rate limiter (`src/lib/rateLimit.ts`) is a best-effort guard
-against runaway client loops, not a hard multi-instance limit — Vercel
-serverless functions can run as multiple concurrent instances. For strict
-production rate limiting, back it with Upstash Redis or a Firestore counter.
+**Pre-existing (not claimed as new):** Next.js app shell and design system, Firebase auth/Firestore data layer, vitals / medications / journal / insights pages, Groq + Gemini chat, 3D symptom checker and body map, document upload + extraction (before verification), landing page.
 
 ---
 
-## Roadmap ideas
+## Features
 
-Things a next iteration would tackle: push/email medication reminders (via
-a scheduled Vercel Cron hitting a `/api/reminders` route), PDF export of
-insights/vitals for appointments, wearable device sync (Apple Health /
-Google Fit), multi-language support, and a proper server-enforced rate
-limiter.
+| Area | What it does |
+| --- | --- |
+| **AI Copilot** | Quick (Groq Llama 3.3 70B) and Deep (Gemini) modes, streaming, per-user thread history. Live emergency notice as you type. |
+| **Symptom Checker** | 3D body map → structured triage with urgency, red flags, self-care tips; urgency enforced by code. |
+| **Documents** | Photo/PDF of a lab report or prescription → editable review → saved only after you confirm. Verified flags, explainer, trend charts. |
+| **Medication safety** | Dosage/schedule tracking, adherence, FDA-grounded interaction + allergy check. |
+| **Visit Prep** | Printable / copyable brief with trends, flagged labs, discussion points, suggested questions. |
+| **Vitals · Journal · Insights** | Logging, charts, mood heatmap, weekly AI insights. |
+| **Emergency access** | Region-aware one-tap call button on every screen. |
+
+## Tech stack
+
+Next.js 16 (App Router, TypeScript) · React 19 · Tailwind v4 · three.js / react-three-fiber · Framer Motion · Recharts · Firebase Auth + Firestore · **Groq** (Llama 3.3 70B) · **Google Gemini** (default `gemini-3.6-flash`, override with `GEMINI_MODEL`) · **openFDA** drug labels · zod · node:test + tsx.
+
+---
+
+## Run it
+
+```bash
+npm install
+cp .env.example .env.local   # fill in Firebase + Groq + Gemini keys
+npm run dev                  # http://localhost:3000
+```
+
+1. **Firebase:** create a project → enable Authentication providers **Email/Password**, **Google** and **Anonymous** (needed for the demo button) → create a Firestore database → paste `firestore.rules` → add a Web app and a service-account key. Copy values into `.env.local` (comments in `.env.example` say where each comes from).
+2. **AI keys (free tiers):** Groq at console.groq.com/keys, Gemini at aistudio.google.com/apikey. An openFDA key is optional.
+3. **Deploy:** push to GitHub → import in Vercel → add the same env vars → add your Vercel domain under Firebase *Authentication → Settings → Authorized domains*.
+4. *Optional housekeeping:* demo sessions create anonymous Firebase users. Enable Firebase's automatic cleanup of anonymous accounts older than 30 days.
+
+### Project structure (new modules)
+
+```
+src/lib/safety/       redFlags.ts (detector, urgency floor, regions) · guard.ts (pre-LLM triage)
+src/lib/labs/         referenceRange.ts (parse, compare, verify)
+src/lib/drugs/        names.ts (normalise, classes, allergies) · openfda.ts (retrieve, evidence, analyse)
+src/lib/trends.ts     vitals trend statistics
+src/lib/visitBrief.ts brief assembly + text export
+src/lib/api/guard.ts  anonymous per-IP rate limiting
+src/lib/demo/seed.ts  fictional demo patient
+src/app/api/documents/explain, visit-prep/questions   new AI routes (zod-validated)
+tests/                54 tests incl. safety eval set
+```
+
+---
+
+## Limitations (honest list)
+
+- **Not a medical device, not HIPAA-compliant.** A real deployment would need a BAA, audit logging, and clinical/legal review.
+- The red-flag detector is **English-only pattern matching**. It is a safety *floor* beneath the model, not a replacement for clinical judgement, and it will miss unusual phrasings. The explainer can answer in 9 languages, but emergency detection of non-English *input* is future work.
+- Lab verification only compares against **the range printed on the report**; it never applies its own clinical ranges, and it won't check categorical (`Negative`) or sex-specific ranges.
+- Interaction checking depends on **openFDA label coverage and wording**. Absence of a mention is not evidence of safety, and the UI says so. Drug-class matching is a small curated list.
+- Translations are model-generated and should be spot-checked by a native speaker before clinical use.
+- The in-memory rate limiter is best-effort per serverless instance; use Redis/Upstash for strict limits.
+- Uses the `@google/generative-ai` SDK; Google now recommends `@google/genai` for new work.
+
+## Roadmap
+
+Clinician-reviewed critical-value thresholds, non-English red-flag detection, medication reminders (cron), wearable sync, FHIR import, and a pharmacist-reviewed interaction knowledge base.
 
 ## License
 
-Copyright (c) 2026 Harsh Yadav. All Rights Reserved.
-
-This is proprietary software. No part of this repository may be copied,
-modified, distributed, or used without prior written permission from the
-author. See [LICENSE](./LICENSE) for full terms.
+Copyright (c) 2026 Harsh Yadav. All Rights Reserved. See [LICENSE](./LICENSE).

@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { EmergencyButton } from "@/components/ui/EmergencyBanner";
 import { FullPageSpinner } from "@/components/ui/Spinner";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { ToastContainer } from "@/components/ui/Toast";
 
@@ -25,6 +26,20 @@ function OnboardingCheck({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function DemoBanner() {
+  const { user } = useAuth();
+  if (!user?.isAnonymous) return null;
+  return (
+    <div className="print:hidden border-b border-amber/30 bg-amber-light px-4 py-2 text-center text-xs text-amber-dark md:pl-64">
+      You&apos;re exploring a <strong>demo with a fictional patient</strong>. Nothing here is real health data.{" "}
+      <Link href="/signup" className="font-semibold underline">
+        Create a free account
+      </Link>{" "}
+      to track your own.
+    </div>
+  );
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
@@ -32,10 +47,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="min-h-screen bg-porcelain">
           <Sidebar />
           <MobileNav />
-          <main className="md:pl-64">
+          <DemoBanner />
+          <main className="md:pl-64 print:pl-0">
             <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">{children}</div>
           </main>
-          <EmergencyButton />
+          <div className="print:hidden">
+            <EmergencyButton />
+          </div>
           <ToastContainer />
         </div>
       </OnboardingCheck>

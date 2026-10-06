@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
+import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { MedicationForm } from "@/components/medications/MedicationForm";
@@ -26,19 +27,33 @@ function isTakenToday(lastTakenAt?: string | null) {
 }
 
 interface InteractionResult {
+  method: "fda_label_grounded" | "ai_only_unverified";
   hasInteractions: boolean;
   interactions: {
     medicationA: string;
     medicationB: string;
-    severity: "mild" | "moderate" | "severe";
+    severity: "mild" | "moderate" | "severe" | "unknown";
+    labelLanguage?: "contraindicated" | "avoid" | "monitor" | "mentioned";
     description: string;
     recommendation: string;
+    evidence?: { source: string; excerpt: string }[];
   }[];
+  allergyAlerts?: { medication: string; allergy: string; note: string }[];
+  unverified?: { name: string; reason: string }[];
+  checkedPairs?: number;
+  labels?: { name: string }[];
   disclaimer: string;
 }
 
+const SEVERITY_LABEL: Record<string, string> = {
+  severe: "LABEL: AVOID / CONTRAINDICATED",
+  moderate: "LABEL: MONITOR",
+  mild: "MILD",
+  unknown: "MENTIONED IN LABEL",
+};
+
 export default function MedicationsPage() {
-  const { user, getIdToken } = useAuth();
+  const { user, profile, getIdToken } = useAuth();
   const { medications, loading } = useMedications();
   const [formOpen, setFormOpen] = useState(false);
   const [checkingInteractions, setCheckingInteractions] = useState(false);
@@ -120,15 +135,15 @@ export default function MedicationsPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ medications: active }),
+        body: JSON.stringify({ medications: active, allergies: profile?.allergies ?? [] }),
       });
       if (!res.ok) throw new Error("Interaction check failed");
       const data = await res.json();
       setInteractionResult(data);
-      if (data.hasInteractions) {
-        toast.warning("Potential drug interactions detected!");
+      if (data.hasInteractions || data.allergyAlerts?.length) {
+        toast.warning("Possible interactions or allergy conflicts found. Review the details.");
       } else {
-        toast.success("No clinical interactions detected.");
+        toast.success("Nothing found in FDA labels. That's not proof of safety, so check with your pharmacist.");
       }
     } catch {
       toast.error("Could not check interactions at this time.");
@@ -213,31 +228,65 @@ export default function MedicationsPage() {
       {interactionResult && (
         <Card className="p-5 border-amber/30 bg-amber-light/20">
           <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 text-amber-dark font-semibold text-sm">
-              <ShieldAlert className="size-4" /> AI Drug Interaction Analysis
+            <div className="flex flex-wrap items-center gap-2 text-amber-dark font-semibold text-sm">
+              <ShieldAlert className="size-4" /> Medication safety check
+              <ProvenanceBadge kind={interactionResult.method === "fda_label_grounded" ? "fda_label" : "ai_only"} />
             </div>
-            <button
-              onClick={() => setInteractionResult(null)}
-              className="text-xs text-ink-soft hover:text-ink"
-            >
+            <button onClick={() => setInteractionResult(null)} className="text-xs text-ink-soft hover:text-ink">
               Dismiss
             </button>
           </div>
+
+          {(interactionResult.allergyAlerts?.length ?? 0) > 0 && (
+            <div className="mt-3 flex flex-col gap-2">
+              {interactionResult.allergyAlerts!.map((a, i) => (
+                <div key={i} className="rounded-xl border border-alert/40 bg-alert-light p-3 text-xs">
+                  <p className="font-semibold text-alert-dark">Possible allergy conflict: {a.medication}</p>
+                  <p className="mt-1 text-ink-2">{a.note} Confirm with your prescriber or pharmacist before your next dose.</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           {interactionResult.hasInteractions ? (
             <div className="flex flex-col gap-3 mt-3">
               {interactionResult.interactions.map((int, i) => (
                 <div key={i} className="p-3 bg-white rounded-xl border border-amber/30 text-xs">
                   <p className="font-semibold text-ink">
-                    {int.medicationA} + {int.medicationB} ({int.severity.toUpperCase()})
+                    {int.medicationA} + {int.medicationB}{" "}
+                    <span className="ml-1 rounded bg-amber-light px-1.5 py-0.5 text-[10px] font-semibold text-amber-dark">
+                      {SEVERITY_LABEL[int.severity] ?? int.severity.toUpperCase()}
+                    </span>
                   </p>
                   <p className="text-ink-2 mt-1">{int.description}</p>
-                  <p className="text-amber-dark font-medium mt-1">Recommendation: {int.recommendation}</p>
+                  <p className="text-amber-dark font-medium mt-1">What to do: {int.recommendation}</p>
+                  {int.evidence && int.evidence.length > 0 && (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-ink-soft hover:text-ink">Show the label text this is based on</summary>
+                      <div className="mt-2 flex flex-col gap-2">
+                        {int.evidence.map((e, j) => (
+                          <blockquote key={j} className="border-l-2 border-border-strong pl-3 text-ink-soft">
+                            &ldquo;{e.excerpt}&rdquo;
+                            <footer className="mt-1 text-[10px] not-italic">{e.source}</footer>
+                          </blockquote>
+                        ))}
+                      </div>
+                    </details>
+                  )}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-sage-dark font-medium">
-              No known clinical interactions detected between your current active medications.
+            <p className="mt-3 text-xs text-ink-2">
+              No mentions between your medicines were found in the FDA labels we checked
+              {interactionResult.checkedPairs ? ` (${interactionResult.checkedPairs} pairs)` : ""}.{" "}
+              <strong>That doesn&apos;t guarantee they&apos;re safe together.</strong> Ask your pharmacist.
+            </p>
+          )}
+
+          {(interactionResult.unverified?.length ?? 0) > 0 && (
+            <p className="mt-3 rounded-lg bg-porcelain-2 p-2.5 text-[11px] text-ink-soft">
+              No label text found for: {interactionResult.unverified!.map((u) => u.name).join(", ")}. These could only be checked through the other medicine&apos;s label.
             </p>
           )}
           <p className="text-[10px] text-ink-soft mt-3 italic">{interactionResult.disclaimer}</p>

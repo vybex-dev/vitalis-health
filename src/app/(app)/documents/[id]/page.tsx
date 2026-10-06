@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/Button";
 import { DocumentStatusBadge } from "@/components/documents/DocumentStatusBadge";
 import { LabResultsReview } from "@/components/documents/LabResultsReview";
 import { MedicationsExtractionReview } from "@/components/documents/MedicationsExtractionReview";
+import { LabExplainer } from "@/components/documents/LabExplainer";
 import { FullPageSpinner } from "@/components/ui/Spinner";
 import { formatDate, formatRelative } from "@/lib/utils";
 
@@ -165,6 +166,10 @@ export default function DocumentDetailPage() {
               sourceDocumentId={document.id}
               onSaved={handleMarkReviewed}
             />
+          )}
+
+          {hasLabValues && (
+            <LabExplainer documentId={document.id} labValues={extraction.labValues} saved={document.explanation} />
           )}
 
           {hasMedications && (

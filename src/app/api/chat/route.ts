@@ -2,6 +2,8 @@ import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { streamGroqChat, groqAvailable, type SimpleMessage } from "@/lib/ai/groq";
 import { COPILOT_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { anonIpLimited } from "@/lib/api/guard";
+import { triageChatMessage } from "@/lib/safety/guard";
 
 export const runtime = "nodejs";
 
@@ -21,6 +23,9 @@ export async function POST(request: Request) {
   if (!auth) {
     return Response.json({ error: "Sign in required." }, { status: 401 });
   }
+
+  const anonBlock = anonIpLimited(request, auth, "chat");
+  if (anonBlock) return anonBlock;
 
   const { allowed, resetInMs } = checkRateLimit(`chat:${auth.uid}`, 30, 10 * 60 * 1000);
   if (!allowed) {
@@ -46,9 +51,15 @@ export async function POST(request: Request) {
     return Response.json({ error: "No messages provided." }, { status: 400 });
   }
 
-  const systemPrompt = context
+  // Deterministic safety check BEFORE any model call: an emergency notice is streamed
+  // first, so urgent guidance never depends on the model (or its API) behaving.
+  const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const triage = triageChatMessage(request, lastUser);
+
+  const systemPromptBase = context
     ? `${COPILOT_SYSTEM_PROMPT}\n\nContext the user has logged in Vitalis (use only if relevant, never invent additional data):\n${context}`
     : COPILOT_SYSTEM_PROMPT;
+  const systemPrompt = systemPromptBase + triage.promptAddendum;
 
   const groqMessages: SimpleMessage[] = [
     { role: "system", content: systemPrompt },
@@ -59,6 +70,7 @@ export async function POST(request: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        if (triage.preamble) controller.enqueue(encoder.encode(triage.preamble + "\n\n"));
         for await (const chunk of streamGroqChat(groqMessages)) {
           controller.enqueue(encoder.encode(chunk));
         }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, HeartPulse } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { DemoButton } from "@/components/auth/DemoButton";
 
 const PulseOrb = dynamic(() => import("@/components/three/PulseOrb"), {
   ssr: false,
@@ -47,6 +48,8 @@ export function Hero() {
               </Button>
             </a>
           </div>
+
+          <DemoButton className="mt-3 max-w-md" variant="outline" />
 
           <p className="mt-6 text-xs text-ink-soft">
             Vitalis gives general health information, not diagnoses — it&apos;s built to sit

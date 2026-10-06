@@ -42,14 +42,15 @@ export async function* streamGroqChat(messages: SimpleMessage[]) {
   }
 }
 
-/** Non-streaming helper, used for short structured tasks if ever needed. */
-export async function groqComplete(messages: SimpleMessage[]) {
+/** Non-streaming helper for short structured tasks. Pass json:true for Groq's JSON mode (prompt must mention "JSON"). */
+export async function groqComplete(messages: SimpleMessage[], opts: { json?: boolean; maxTokens?: number } = {}) {
   const groq = getClient();
   const completion = await groq.chat.completions.create({
     model: GROQ_MODEL,
     messages,
-    temperature: 0.3,
-    max_tokens: 700,
+    temperature: 0.2,
+    max_tokens: opts.maxTokens ?? 700,
+    ...(opts.json ? { response_format: { type: "json_object" as const } } : {}),
   });
   return completion.choices[0]?.message?.content ?? "";
 }

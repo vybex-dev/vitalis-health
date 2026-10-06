@@ -8,7 +8,9 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { addLabResult } from "@/lib/firebase/repo";
+import { summarizeVerification } from "@/lib/labs/referenceRange";
 import { cn } from "@/lib/utils";
+import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
 import type { ExtractedLabValue } from "@/types";
 
 interface Row extends ExtractedLabValue {
@@ -35,6 +37,7 @@ export function LabResultsReview({
   }
 
   const includedCount = rows.filter((r) => r.included).length;
+  const summary = values.some((v) => v.verification) ? summarizeVerification(values) : null;
 
   async function handleSave() {
     if (!user || includedCount === 0) return;
@@ -70,6 +73,17 @@ export function LabResultsReview({
         <CardTitle>Lab results found ({values.length})</CardTitle>
       </CardHeader>
       <CardBody className="pt-0">
+        {summary && (
+          <p className="mb-4 rounded-xl bg-porcelain-2 p-3 text-xs text-ink-2">
+            <strong>{summary.verified}</strong> of {summary.total} flags were re-checked against your report&apos;s printed ranges
+            {summary.corrected > 0 && (
+              <>
+                {" "}· <strong className="text-amber-dark">{summary.corrected} corrected</strong>
+              </>
+            )}
+            {summary.unverifiable > 0 && <> · {summary.unverifiable} couldn&apos;t be auto-checked</>}.
+          </p>
+        )}
         <div className="mb-4 flex items-end gap-3">
           <Input
             label="Date of this report"
@@ -85,10 +99,12 @@ export function LabResultsReview({
             <div
               key={i}
               className={cn(
-                "grid grid-cols-[auto_1.4fr_0.9fr_0.7fr_1fr_0.8fr] items-center gap-2 rounded-xl border border-border p-2.5",
+                "rounded-xl border p-2.5",
+                row.verification?.status === "corrected" ? "border-amber/50 bg-amber-light/30" : "border-border",
                 !row.included && "opacity-40"
               )}
             >
+            <div className="grid grid-cols-[auto_1.4fr_0.9fr_0.7fr_1fr_0.8fr] items-center gap-2">
               <input
                 type="checkbox"
                 checked={row.included}
@@ -128,6 +144,15 @@ export function LabResultsReview({
                 <option value="high">High</option>
                 <option value="unknown">Unknown</option>
               </Select>
+            </div>
+            {row.verification && (
+              <div className="mt-1.5 flex flex-wrap items-center gap-2 pl-6">
+                <ProvenanceBadge kind={row.verification.status} />
+                {row.verification.status !== "verified" && (
+                  <span className="text-xs text-ink-soft">{row.verification.note}</span>
+                )}
+              </div>
+            )}
             </div>
           ))}
         </div>

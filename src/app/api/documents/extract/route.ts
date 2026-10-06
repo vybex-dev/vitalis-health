@@ -2,7 +2,9 @@ import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSONFromFile, geminiAvailable } from "@/lib/ai/gemini";
 import { DOCUMENT_EXTRACTION_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";
 import { checkRateLimit } from "@/lib/rateLimit";
-import type { DocumentExtraction, DocumentType } from "@/types";
+import { anonIpLimited } from "@/lib/api/guard";
+import { summarizeVerification, verifyLabValue } from "@/lib/labs/referenceRange";
+import type { DocumentExtraction, DocumentType, ExtractedLabValue } from "@/types";
 
 export const runtime = "nodejs";
 
@@ -27,6 +29,9 @@ export async function POST(request: Request) {
   }
   const auth = await verifyRequestToken(request);
   if (!auth) return Response.json({ error: "Sign in required." }, { status: 401 });
+
+  const anonBlock = anonIpLimited(request, auth, "doc-extract");
+  if (anonBlock) return anonBlock;
 
   const { allowed, resetInMs } = checkRateLimit(`doc-extract:${auth.uid}`, 15, 30 * 60 * 1000);
   if (!allowed) {
@@ -70,7 +75,13 @@ export async function POST(request: Request) {
     if (!VALID_TYPES.includes(extraction.documentType)) {
       extraction.documentType = "other";
     }
-    extraction.labValues = Array.isArray(extraction.labValues) ? extraction.labValues.slice(0, 60) : [];
+    // Trust layer: the model transcribed the report AND guessed each flag. Recompute the flag
+    // in code from the report's own printed range, and surface any disagreement.
+    const rawValues = Array.isArray(extraction.labValues) ? extraction.labValues.slice(0, 60) : [];
+    extraction.labValues = rawValues
+      .filter((v): v is ExtractedLabValue => Boolean(v) && typeof v.testName === "string" && v.value !== undefined && v.value !== null)
+      .map((v) => verifyLabValue({ ...v, value: String(v.value) }));
+    extraction.verificationSummary = summarizeVerification(extraction.labValues);
     extraction.medications = Array.isArray(extraction.medications) ? extraction.medications.slice(0, 20) : [];
     if (!extraction.disclaimer) {
       extraction.disclaimer = "This is an automated transcription — please verify it against the original document.";

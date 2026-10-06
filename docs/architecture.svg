@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" font-family="Inter, 'IBM Plex Sans', Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4c6863"/></marker>
+  </defs>
+  <rect width="1200" height="760" fill="#f4f7f6"/>
+  <text x="40" y="48" font-size="26" font-weight="700" fill="#0e2b29">Vitalis: AI that is verified, grounded, or labelled</text>
+  <text x="40" y="76" font-size="14" fill="#4c6863">Models read and write. Deterministic code checks, retrieves evidence, and enforces safety. Users always see which is which.</text>
+
+  <!-- client -->
+  <rect x="40" y="110" width="250" height="560" rx="16" fill="#fff" stroke="#c2d2cc"/>
+  <text x="165" y="140" text-anchor="middle" font-size="16" font-weight="700" fill="#0e2b29">Browser (Next.js)</text>
+  <g font-size="13" fill="#1f4742">
+    <rect x="60" y="160" width="210" height="46" rx="10" fill="#fbe4e0" stroke="#d34331"/><text x="165" y="180" text-anchor="middle" font-weight="700" fill="#a92f21">Red-flag detector</text><text x="165" y="197" text-anchor="middle" font-size="11">runs as you type, no network</text>
+    <rect x="60" y="222" width="210" height="40" rx="10" fill="#e9f0ee"/><text x="165" y="247" text-anchor="middle">Copilot chat (streaming)</text>
+    <rect x="60" y="272" width="210" height="40" rx="10" fill="#e9f0ee"/><text x="165" y="297" text-anchor="middle">3D symptom checker</text>
+    <rect x="60" y="322" width="210" height="40" rx="10" fill="#e9f0ee"/><text x="165" y="347" text-anchor="middle">Documents + explainer</text>
+    <rect x="60" y="372" width="210" height="40" rx="10" fill="#e9f0ee"/><text x="165" y="397" text-anchor="middle">Medication safety</text>
+    <rect x="60" y="422" width="210" height="40" rx="10" fill="#e9f0ee"/><text x="165" y="447" text-anchor="middle">Visit prep brief (print / copy)</text>
+    <rect x="60" y="472" width="210" height="40" rx="10" fill="#e9f0ee"/><text x="165" y="497" text-anchor="middle">Vitals · Journal · Insights</text>
+    <rect x="60" y="540" width="210" height="46" rx="10" fill="#e2f2ea" stroke="#4f9c7d"/><text x="165" y="560" text-anchor="middle" font-weight="700" fill="#357259">Trends + brief assembly</text><text x="165" y="577" text-anchor="middle" font-size="11">pure functions, unit-tested</text>
+    <text x="165" y="615" text-anchor="middle" font-size="11">Read-aloud · 9 languages · RTL</text>
+    <text x="165" y="640" text-anchor="middle" font-size="11">Anonymous demo session</text>
+  </g>
+
+  <!-- api -->
+  <rect x="350" y="110" width="500" height="560" rx="16" fill="#fff" stroke="#c2d2cc"/>
+  <text x="600" y="140" text-anchor="middle" font-size="16" font-weight="700" fill="#0e2b29">Next.js API routes (server-only secrets)</text>
+  <rect x="370" y="156" width="460" height="44" rx="10" fill="#e9f0ee"/>
+  <text x="600" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4742">Guard on every route</text>
+  <text x="600" y="192" text-anchor="middle" font-size="11" fill="#1f4742">Firebase ID-token verify · per-user + per-IP (anonymous) rate limit · zod validation</text>
+
+  <g font-size="12" fill="#1f4742">
+    <rect x="370" y="214" width="460" height="64" rx="10" fill="#fbe4e0" stroke="#d34331"/>
+    <text x="385" y="234" font-weight="700" fill="#a92f21">/api/chat · /chat/deep · /symptom-check</text>
+    <text x="385" y="252">Emergency notice streamed BEFORE the model. Urgency floor in code.</text>
+    <text x="385" y="268">Rule-based emergency result still returned if the model is down.</text>
+
+    <rect x="370" y="290" width="460" height="70" rx="10" fill="#e2f2ea" stroke="#4f9c7d"/>
+    <text x="385" y="310" font-weight="700" fill="#357259">/api/documents/extract</text>
+    <text x="385" y="328">Gemini vision transcribes the report; code re-computes every flag from</text>
+    <text x="385" y="344">the printed reference range and marks verified / corrected / unverifiable.</text>
+
+    <rect x="370" y="372" width="460" height="70" rx="10" fill="#e2f2ea" stroke="#4f9c7d"/>
+    <text x="385" y="392" font-weight="700" fill="#357259">/api/medications/check-interactions</text>
+    <text x="385" y="410">Retrieve FDA label text → find excerpts naming the other drug (or its</text>
+    <text x="385" y="426">class) → model only summarises them. Advice = fixed templates.</text>
+
+    <rect x="370" y="454" width="460" height="56" rx="10" fill="#e9f0ee"/>
+    <text x="385" y="474" font-weight="700">/api/documents/explain</text>
+    <text x="385" y="492">Plain-language, multilingual; explains code-verified flags only</text>
+
+    <rect x="370" y="522" width="460" height="48" rx="10" fill="#e9f0ee"/>
+    <text x="385" y="542" font-weight="700">/api/visit-prep/questions · /insights/weekly · /journal/summary</text>
+    <text x="385" y="558">Gemini structured JSON from facts computed in code</text>
+
+    <rect x="370" y="584" width="460" height="68" rx="10" fill="#fff" stroke="#c2d2cc" stroke-dasharray="5 4"/>
+    <text x="385" y="606" font-weight="700">Failure modes are designed, not accidental</text>
+    <text x="385" y="624">FDA lookup down → result labelled "AI only · unverified" · no label → "not found",</text>
+    <text x="385" y="640">never "safe" · bad model JSON → rejected by zod, not shown</text>
+  </g>
+
+  <!-- externals -->
+  <rect x="910" y="110" width="250" height="150" rx="16" fill="#fff" stroke="#c2d2cc"/>
+  <text x="1035" y="140" text-anchor="middle" font-size="16" font-weight="700" fill="#0e2b29">Models</text>
+  <text x="1035" y="172" text-anchor="middle" font-size="13" fill="#1f4742">Groq · Llama 3.3 70B</text><text x="1035" y="190" text-anchor="middle" font-size="11" fill="#4c6863">fast chat, label summaries</text>
+  <text x="1035" y="218" text-anchor="middle" font-size="13" fill="#1f4742">Gemini 3.6 Flash</text><text x="1035" y="236" text-anchor="middle" font-size="11" fill="#4c6863">vision, structured JSON, deep chat</text>
+
+  <rect x="910" y="290" width="250" height="130" rx="16" fill="#e2f2ea" stroke="#4f9c7d"/>
+  <text x="1035" y="320" text-anchor="middle" font-size="16" font-weight="700" fill="#357259">openFDA drug labels</text>
+  <text x="1035" y="346" text-anchor="middle" font-size="12" fill="#1f4742">public evidence source</text>
+  <text x="1035" y="366" text-anchor="middle" font-size="11" fill="#4c6863">24 h cache · 6 s timeout</text>
+  <text x="1035" y="384" text-anchor="middle" font-size="11" fill="#4c6863">optional API key</text>
+
+  <rect x="910" y="450" width="250" height="220" rx="16" fill="#fff" stroke="#c2d2cc"/>
+  <text x="1035" y="480" text-anchor="middle" font-size="16" font-weight="700" fill="#0e2b29">Firebase</text>
+  <text x="1035" y="510" text-anchor="middle" font-size="13" fill="#1f4742">Auth (email, Google, anonymous)</text>
+  <text x="1035" y="536" text-anchor="middle" font-size="13" fill="#1f4742">Firestore, per-user rules</text>
+  <text x="1035" y="566" text-anchor="middle" font-size="11" fill="#4c6863">/users/{uid}/… only the owner</text>
+  <text x="1035" y="584" text-anchor="middle" font-size="11" fill="#4c6863">can read or write</text>
+  <text x="1035" y="620" text-anchor="middle" font-size="11" fill="#4c6863">No file storage service:</text>
+  <text x="1035" y="638" text-anchor="middle" font-size="11" fill="#4c6863">documents stay in Firestore</text>
+
+  <g stroke="#4c6863" stroke-width="2" fill="none" marker-end="url(#a)">
+    <path d="M290 330 H350"/><path d="M850 250 H910"/><path d="M850 400 H910"/><path d="M290 560 L350 560"/><path d="M850 560 H910"/>
+  </g>
+  <text x="40" y="720" font-size="12" fill="#4c6863">Legend: red = deterministic safety · green = verification / grounding in code or public sources · grey = model-generated and clearly labelled</text>
+  <text x="40" y="740" font-size="12" fill="#4c6863">Vitalis provides general health information. It is not a medical device and does not diagnose.</text>
+</svg>
