@@ -1,3 +1,4 @@
+// storage.rules: Cloud Storage security rules for user-uploaded health documents.
 rules_version = '2';
 
 // Vitalis Storage security rules.

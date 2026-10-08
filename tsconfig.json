@@ -1,3 +1,4 @@
+// tsconfig.json: TypeScript compiler configuration for the Next.js app.
 {
   "compilerOptions": {
     "target": "ES2017",

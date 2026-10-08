@@ -1,3 +1,4 @@
+// firestore.rules: Firestore security rules limiting each user to their own data.
 rules_version = '2';
 
 // Vitalis Firestore security rules.
