@@ -1,3 +1,4 @@
+// src/hooks/useEmergencyRegion.ts: Hook that determines the user's emergency-number region.
 "use client";
 
 import { useCallback, useEffect, useState } from "react";

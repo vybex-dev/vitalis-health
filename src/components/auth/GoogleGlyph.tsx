@@ -1,3 +1,4 @@
+// src/components/auth/GoogleGlyph.tsx: Google logo icon used on sign-in buttons.
 export function GoogleGlyph() {
   return (
     <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden>

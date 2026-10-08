@@ -1,3 +1,4 @@
+// src/app/api/documents/explain/route.ts: API route that explains lab results in plain language.
 import { z } from "zod";
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSON, geminiAvailable } from "@/lib/ai/gemini";

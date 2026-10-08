@@ -1,3 +1,4 @@
+// src/components/landing/Trust.tsx: Landing page trust and privacy section.
 "use client";
 
 import { motion } from "framer-motion";

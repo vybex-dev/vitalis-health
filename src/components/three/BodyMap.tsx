@@ -1,3 +1,4 @@
+// src/components/three/BodyMap.tsx: Interactive body map for selecting symptom regions.
 "use client";
 
 import { useMemo, useRef, useState } from "react";

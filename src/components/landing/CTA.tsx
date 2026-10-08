@@ -1,3 +1,4 @@
+// src/components/landing/CTA.tsx: Landing page call-to-action section.
 "use client";
 
 import Link from "next/link";

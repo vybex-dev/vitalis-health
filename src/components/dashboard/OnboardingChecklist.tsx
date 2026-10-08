@@ -1,3 +1,4 @@
+// src/components/dashboard/OnboardingChecklist.tsx: Checklist guiding new users through first setup steps.
 "use client";
 
 import { useState, useEffect } from "react";

@@ -1,3 +1,4 @@
+// src/lib/rateLimit.ts: In-memory rate limiting.
 // Best-effort in-memory rate limiter. Serverless functions on Vercel are
 // stateless between cold starts and can run as multiple concurrent
 // instances, so this is NOT a hard guarantee — for strict multi-instance

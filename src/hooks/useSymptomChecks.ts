@@ -1,3 +1,4 @@
+// src/hooks/useSymptomChecks.ts: Hooks for symptom checks and weekly insights data.
 "use client";
 
 import { useEffect, useState } from "react";

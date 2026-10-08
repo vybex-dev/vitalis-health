@@ -1,3 +1,4 @@
+// src/components/vitals/VitalsForm.tsx: Form for logging vitals readings.
 "use client";
 
 import { useState } from "react";

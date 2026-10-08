@@ -1,3 +1,4 @@
+// src/lib/firebase/repo.ts: Firestore data access functions.
 "use client";
 
 import {

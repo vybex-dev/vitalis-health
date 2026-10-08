@@ -1,3 +1,4 @@
+// src/lib/ai/languages.ts: Supported languages for AI responses.
 export interface Language {
   code: string;
   label: string; // native name

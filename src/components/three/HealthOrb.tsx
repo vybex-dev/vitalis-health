@@ -1,3 +1,4 @@
+// src/components/three/HealthOrb.tsx: 3D health orb visual.
 "use client";
 
 import { useRef } from "react";

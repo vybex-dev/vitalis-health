@@ -1,3 +1,4 @@
+// src/lib/aiClient.ts: Client-side wrappers for calling the AI API routes.
 import type { VitalReading, JournalEntry, SymptomCheck, HealthInsight, DocumentExtraction, ExtractedLabValue, ReadingLevel, ReportExplanation } from "@/types";
 import type { VisitBrief } from "@/lib/visitBrief";
 

@@ -1,3 +1,4 @@
+// tests/labs.test.ts: Tests for lab reference range parsing and flagging.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

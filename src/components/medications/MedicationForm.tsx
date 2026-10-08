@@ -1,3 +1,4 @@
+// src/components/medications/MedicationForm.tsx: Form for adding or editing a medication.
 "use client";
 
 import { useState } from "react";

@@ -1,3 +1,4 @@
+// src/components/documents/LabResultsReview.tsx: Review and confirm lab values extracted from a document.
 "use client";
 
 import { useState } from "react";

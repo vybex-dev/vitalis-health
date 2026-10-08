@@ -1,3 +1,4 @@
+// src/components/symptom/UrgencyBadge.tsx: Badge showing symptom urgency level.
 import { Badge } from "@/components/ui/Badge";
 import { URGENCY_META } from "@/types";
 import type { UrgencyLevel } from "@/types";

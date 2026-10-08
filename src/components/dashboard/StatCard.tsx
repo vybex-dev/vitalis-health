@@ -1,3 +1,4 @@
+// src/components/dashboard/StatCard.tsx: Compact stat card used for dashboard metrics.
 import type { LucideIcon } from "lucide-react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card } from "@/components/ui/Card";

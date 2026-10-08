@@ -1,3 +1,4 @@
+// src/hooks/useHealthDocuments.ts: Hooks for subscribing to health documents.
 "use client";
 
 import { useEffect, useState } from "react";

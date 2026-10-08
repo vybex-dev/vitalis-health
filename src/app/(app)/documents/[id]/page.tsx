@@ -1,3 +1,4 @@
+// src/app/(app)/documents/[id]/page.tsx: Detail view for a single uploaded health document and its extracted data.
 "use client";
 
 import { useState } from "react";

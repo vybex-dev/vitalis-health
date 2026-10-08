@@ -1,3 +1,4 @@
+// src/components/landing/Hero.tsx: Landing page hero section.
 "use client";
 
 import dynamic from "next/dynamic";

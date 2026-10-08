@@ -1,3 +1,4 @@
+// src/app/(app)/profile/page.tsx: User profile page for personal and emergency details.
 "use client";
 
 import { useEffect, useState } from "react";

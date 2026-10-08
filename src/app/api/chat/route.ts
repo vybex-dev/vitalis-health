@@ -1,3 +1,4 @@
+// src/app/api/chat/route.ts: API route for the standard AI chat with safety triage.
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { streamGroqChat, groqAvailable, type SimpleMessage } from "@/lib/ai/groq";
 import { COPILOT_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";

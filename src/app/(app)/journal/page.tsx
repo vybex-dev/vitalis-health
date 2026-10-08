@@ -1,3 +1,4 @@
+// src/app/(app)/journal/page.tsx: Health journal page with mood heatmap and entry form.
 "use client";
 
 import { useState } from "react";

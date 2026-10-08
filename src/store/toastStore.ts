@@ -1,3 +1,4 @@
+// src/store/toastStore.ts: Zustand store for toast notifications.
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 

@@ -1,3 +1,4 @@
+// src/components/chat/ThreadHistory.tsx: Sidebar list of previous chat threads.
 "use client";
 
 import { useState } from "react";

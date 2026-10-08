@@ -1,3 +1,4 @@
+// src/lib/firebase/client.ts: Firebase client SDK initialization.
 "use client";
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";

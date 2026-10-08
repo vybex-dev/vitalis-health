@@ -1,3 +1,4 @@
+// src/lib/trends.ts: Vital trend calculations.
 import { VITAL_META } from "@/types";
 import type { VitalReading, VitalType } from "@/types";
 

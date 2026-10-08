@@ -1,3 +1,4 @@
+// src/components/safety/EmergencyNotice.tsx: Emergency notice shown when red-flag symptoms are detected.
 "use client";
 
 import { Phone, Siren } from "lucide-react";

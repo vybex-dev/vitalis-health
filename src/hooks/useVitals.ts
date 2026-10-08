@@ -1,3 +1,4 @@
+// src/hooks/useVitals.ts: Hook for vitals data and actions.
 "use client";
 
 import { useEffect, useState } from "react";

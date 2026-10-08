@@ -1,3 +1,4 @@
+// src/lib/ai/systemPrompts.ts: System prompts for the AI copilot and symptom checker.
 // Central place for every prompt sent to Groq / Gemini. Keeping the safety
 // framing in one file makes it easy to audit and keeps every AI surface in
 // the product consistent.

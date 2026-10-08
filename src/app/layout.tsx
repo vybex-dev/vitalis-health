@@ -1,3 +1,4 @@
+// src/app/layout.tsx: Root layout: metadata, viewport, fonts and global providers.
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import "./globals.css";

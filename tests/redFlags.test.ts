@@ -1,3 +1,4 @@
+// tests/redFlags.test.ts: Tests for red-flag symptom detection.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,3 +1,4 @@
+// src/components/auth/DemoButton.tsx: Button that signs in to a seeded demo account.
 "use client";
 
 import { useState } from "react";

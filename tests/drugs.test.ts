@@ -1,3 +1,4 @@
+// tests/drugs.test.ts: Tests for drug name normalization and lookup.
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { checkAllergies, extractIngredients, normalizeDrugName } from "../src/lib/drugs/names";

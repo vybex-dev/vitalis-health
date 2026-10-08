@@ -1,3 +1,4 @@
+// src/components/medications/AdherenceRing.tsx: Ring visualization of medication adherence.
 "use client";
 
 import { ProgressRing } from "@/components/ui/ProgressRing";

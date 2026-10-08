@@ -1,3 +1,4 @@
+// src/components/layout/MobileNav.tsx: Bottom navigation bar for mobile screens.
 "use client";
 
 import { useState } from "react";

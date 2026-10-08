@@ -1,3 +1,4 @@
+// src/components/dashboard/InsightCard.tsx: Card showing the latest AI insight on the dashboard.
 "use client";
 
 import { useState } from "react";

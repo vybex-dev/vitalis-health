@@ -1,3 +1,4 @@
+// src/app/(auth)/signup/page.tsx: Signup page for creating a new account.
 "use client";
 
 import { useEffect, useState } from "react";

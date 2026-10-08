@@ -1,3 +1,4 @@
+// src/lib/demo/seed.ts: Seeds demo data for the demo account.
 "use client";
 
 import { collection, getDocs, limit, query } from "firebase/firestore";

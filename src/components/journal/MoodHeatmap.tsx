@@ -1,3 +1,4 @@
+// src/components/journal/MoodHeatmap.tsx: Calendar heatmap of mood over time.
 "use client";
 
 import { Card } from "@/components/ui/Card";

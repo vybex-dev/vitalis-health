@@ -1,3 +1,4 @@
+// src/app/(app)/dashboard/page.tsx: Dashboard overview: health score, vitals stats, meds, streaks and insights.
 "use client";
 
 import dynamic from "next/dynamic";

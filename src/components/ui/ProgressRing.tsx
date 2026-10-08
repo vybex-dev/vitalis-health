@@ -1,3 +1,4 @@
+// src/components/ui/ProgressRing.tsx: Reusable circular progress ring.
 import { cn } from "@/lib/utils";
 
 interface ProgressRingProps {

@@ -1,3 +1,4 @@
+// src/components/ui/Modal.tsx: Reusable modal dialog component.
 "use client";
 
 import { type ReactNode } from "react";

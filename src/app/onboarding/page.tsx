@@ -1,3 +1,4 @@
+// src/app/onboarding/page.tsx: Onboarding flow for new users to set up their profile.
 "use client";
 
 import { useState } from "react";

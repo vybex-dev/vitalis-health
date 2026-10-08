@@ -1,3 +1,4 @@
+// src/components/documents/DocumentStatusBadge.tsx: Badge showing a document's processing status.
 import { Badge } from "@/components/ui/Badge";
 import type { DocumentStatus } from "@/types";
 

@@ -1,3 +1,4 @@
+// src/components/documents/DocumentUploader.tsx: Drag-and-drop uploader for health documents.
 "use client";
 
 import { useCallback, useRef, useState } from "react";

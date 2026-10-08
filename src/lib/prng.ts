@@ -1,3 +1,4 @@
+// src/lib/prng.ts: Seeded pseudo-random number generator.
 // A tiny deterministic PRNG (mulberry32). Used instead of Math.random() when
 // generating one-off geometry (particle positions, etc.) inside render/useMemo,
 // so the calculation stays a pure function of its inputs — which keeps it

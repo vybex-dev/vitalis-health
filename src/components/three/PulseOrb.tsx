@@ -1,3 +1,4 @@
+// src/components/three/PulseOrb.tsx: 3D pulsing orb visual.
 "use client";
 
 import { useMemo, useRef } from "react";

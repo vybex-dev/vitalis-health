@@ -1,3 +1,4 @@
+// tests/guard.test.ts: Tests for chat safety triage.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { regionFromRequest, triageChatMessage } from "../src/lib/safety/guard";

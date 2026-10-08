@@ -1,3 +1,4 @@
+// src/lib/auth/AuthContext.tsx: Auth context provider and useAuth hook.
 "use client";
 
 import {

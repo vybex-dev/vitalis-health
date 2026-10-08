@@ -1,3 +1,4 @@
+// src/components/auth/AuthGuard.tsx: Redirects unauthenticated users away from protected pages.
 "use client";
 
 import { useEffect } from "react";

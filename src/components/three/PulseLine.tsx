@@ -1,3 +1,4 @@
+// src/components/three/PulseLine.tsx: 3D pulse line visual.
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";

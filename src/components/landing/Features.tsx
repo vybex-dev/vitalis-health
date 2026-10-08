@@ -1,3 +1,4 @@
+// src/components/landing/Features.tsx: Landing page features section.
 "use client";
 
 import { motion } from "framer-motion";

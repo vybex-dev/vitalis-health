@@ -1,3 +1,4 @@
+// src/lib/drugs/names.ts: Drug name normalization and ingredient extraction.
 // Drug-name normalisation, therapeutic-class lookup and allergy cross-checks.
 // All deterministic and unit-tested (tests/drugs.test.ts).
 

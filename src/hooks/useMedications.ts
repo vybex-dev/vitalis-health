@@ -1,3 +1,4 @@
+// src/hooks/useMedications.ts: Hook for medications data and actions.
 "use client";
 
 import { useEffect, useState } from "react";

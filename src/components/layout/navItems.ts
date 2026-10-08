@@ -1,3 +1,4 @@
+// src/components/layout/navItems.ts: Navigation item definitions shared by the sidebar and mobile nav.
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,

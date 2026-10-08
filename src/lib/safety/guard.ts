@@ -1,3 +1,4 @@
+// src/lib/safety/guard.ts: Chat safety triage and emergency region helpers.
 import {
   detectRedFlags,
   emergencyNotice,

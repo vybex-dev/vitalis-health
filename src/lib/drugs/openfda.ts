@@ -1,3 +1,4 @@
+// src/lib/drugs/openfda.ts: OpenFDA drug label lookup and interaction evidence.
 import { checkAllergies, classesOf, extractIngredients, type AllergyAlert } from "@/lib/drugs/names";
 
 // Retrieval-grounded interaction checking.

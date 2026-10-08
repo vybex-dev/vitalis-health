@@ -1,3 +1,4 @@
+// src/lib/ai/groq.ts: Groq API client helpers.
 import Groq from "groq-sdk";
 
 let client: Groq | null = null;

@@ -1,3 +1,4 @@
+// src/components/landing/HowItWorks.tsx: Landing page how-it-works section.
 "use client";
 
 import { motion } from "framer-motion";

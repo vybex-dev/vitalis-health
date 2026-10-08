@@ -1,3 +1,4 @@
+// src/app/api/journal/summary/route.ts: API route that summarizes journal entries with AI.
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSON, geminiAvailable } from "@/lib/ai/gemini";
 import { JOURNAL_SUMMARY_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";

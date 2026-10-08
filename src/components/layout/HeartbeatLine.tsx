@@ -1,3 +1,4 @@
+// src/components/layout/HeartbeatLine.tsx: Animated heartbeat line decoration.
 "use client";
 
 import { useId } from "react";

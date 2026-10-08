@@ -1,3 +1,4 @@
+// src/app/(app)/medications/page.tsx: Medications page: list, adherence, add/edit and interaction checks.
 "use client";
 
 import { useState } from "react";

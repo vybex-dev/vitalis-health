@@ -1,3 +1,4 @@
+// src/components/layout/Logo.tsx: Vitalis logo component.
 import { cn } from "@/lib/utils";
 
 export function Logo({ className, dark = false }: { className?: string; dark?: boolean }) {

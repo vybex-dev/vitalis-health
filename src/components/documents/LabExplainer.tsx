@@ -1,3 +1,4 @@
+// src/components/documents/LabExplainer.tsx: Plain-language AI explanation panel for lab results.
 "use client";
 
 import { useEffect, useState } from "react";

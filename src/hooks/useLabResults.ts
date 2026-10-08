@@ -1,3 +1,4 @@
+// src/hooks/useLabResults.ts: Hook for lab results data.
 "use client";
 
 import { useEffect, useState } from "react";

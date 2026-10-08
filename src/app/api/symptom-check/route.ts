@@ -1,3 +1,4 @@
+// src/app/api/symptom-check/route.ts: API route that runs the AI symptom check.
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSON, geminiAvailable } from "@/lib/ai/gemini";
 import { SYMPTOM_CHECK_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";

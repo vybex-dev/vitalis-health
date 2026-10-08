@@ -1,3 +1,4 @@
+// src/types/index.ts: Shared TypeScript types for the app.
 import type { LabVerification } from "@/lib/labs/referenceRange";
 
 // Shared domain types for Vitalis. Firestore documents are typed loosely

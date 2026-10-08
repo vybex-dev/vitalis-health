@@ -1,3 +1,4 @@
+// src/app/api/insights/weekly/route.ts: API route that generates the weekly AI health insight.
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSON, geminiAvailable } from "@/lib/ai/gemini";
 import { INSIGHT_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";

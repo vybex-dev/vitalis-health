@@ -1,3 +1,4 @@
+// src/components/chat/MessageBubble.tsx: Single chat message bubble for user and assistant messages.
 "use client";
 
 import { useState } from "react";

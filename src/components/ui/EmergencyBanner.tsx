@@ -1,3 +1,4 @@
+// src/components/ui/EmergencyBanner.tsx: Emergency call button/banner component.
 "use client";
 
 import { useState } from "react";

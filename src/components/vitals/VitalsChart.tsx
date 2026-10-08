@@ -1,3 +1,4 @@
+// src/components/vitals/VitalsChart.tsx: Chart of vitals readings over time.
 "use client";
 
 import { useState } from "react";

@@ -1,3 +1,4 @@
+// src/hooks/useDocumentUpload.ts: Hook handling document upload and processing state.
 "use client";
 
 import { useCallback, useState } from "react";

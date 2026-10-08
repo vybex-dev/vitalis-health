@@ -1,3 +1,4 @@
+// src/hooks/useJournal.ts: Hook for journal entries data and actions.
 "use client";
 
 import { useEffect, useState } from "react";

@@ -1,3 +1,4 @@
+// src/lib/fileUpload.ts: Prepares and validates files before upload.
 "use client";
 
 // Firestore caps a single document at 1MB. We store the uploaded file

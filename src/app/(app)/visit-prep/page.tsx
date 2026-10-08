@@ -1,3 +1,4 @@
+// src/app/(app)/visit-prep/page.tsx: Doctor visit preparation page that builds a brief and suggested questions.
 "use client";
 
 import { useMemo, useState } from "react";

@@ -1,3 +1,4 @@
+// src/components/dashboard/StreakCard.tsx: Card showing the user's logging streak.
 "use client";
 
 import { Flame } from "lucide-react";

@@ -1,3 +1,4 @@
+// src/app/(app)/symptom-checker/page.tsx: Symptom checker page with body map and AI urgency assessment.
 "use client";
 
 import { useState } from "react";

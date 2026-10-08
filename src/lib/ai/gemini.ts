@@ -1,3 +1,4 @@
+// src/lib/ai/gemini.ts: Gemini API client helpers.
 import { GoogleGenerativeAI, type Content } from "@google/generative-ai";
 /**
  * Gemini's `responseMimeType: "application/json"` mode is reliable but not

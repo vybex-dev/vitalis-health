@@ -1,3 +1,4 @@
+/* src/app/globals.css: Global styles, Tailwind import and theme tokens. */
 @import "tailwindcss";
 @import "@fontsource/space-grotesk/500.css";
 @import "@fontsource/space-grotesk/600.css";

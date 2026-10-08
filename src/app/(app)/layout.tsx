@@ -1,3 +1,4 @@
+// src/app/(app)/layout.tsx: Layout for authenticated app pages (auth guard, sidebar, navigation).
 "use client";
 
 import { useEffect } from "react";

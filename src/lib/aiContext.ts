@@ -1,3 +1,4 @@
+// src/lib/aiContext.ts: Builds the user health context passed to AI prompts.
 import type { UserProfile, VitalReading, Medication, LabResult } from "@/types";
 
 export function buildUserContext(

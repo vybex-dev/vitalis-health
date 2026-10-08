@@ -1,3 +1,4 @@
+// src/lib/utils.ts: General utility helpers (class names, date formatting).
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

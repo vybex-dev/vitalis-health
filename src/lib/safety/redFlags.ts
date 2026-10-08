@@ -1,3 +1,4 @@
+// src/lib/safety/redFlags.ts: Red-flag symptom detection.
 // Deterministic emergency red-flag detection.
 //
 // Why this exists: Vitalis previously relied entirely on the LLM obeying a

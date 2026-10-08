@@ -1,3 +1,4 @@
+// src/lib/api/guard.ts: API route helpers for client IP and anonymous rate limiting.
 import { checkRateLimit } from "@/lib/rateLimit";
 
 // Anonymous "Try the demo" accounts are free to create, so a per-user rate limit

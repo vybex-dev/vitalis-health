@@ -1,3 +1,4 @@
+// src/lib/labs/referenceRange.ts: Parses lab reference ranges and flags values.
 // Deterministic verification of AI-extracted lab values.
 //
 // The extraction model reads the page (vision) and ALSO labels each value

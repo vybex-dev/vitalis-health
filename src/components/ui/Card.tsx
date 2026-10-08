@@ -1,3 +1,4 @@
+// src/components/ui/Card.tsx: Reusable card container components.
 import { type HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 

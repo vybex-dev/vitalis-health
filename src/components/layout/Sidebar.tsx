@@ -1,3 +1,4 @@
+// src/components/layout/Sidebar.tsx: Sidebar navigation for the authenticated app.
 "use client";
 
 import dynamic from "next/dynamic";

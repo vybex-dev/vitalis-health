@@ -1,3 +1,4 @@
+// src/lib/healthScore.ts: Computes the overall health score.
 import type { VitalReading, JournalEntry, Medication } from "@/types";
 import type { HealthScore } from "@/types";
 

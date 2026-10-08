@@ -1,3 +1,4 @@
+// src/lib/medHelpers.ts: Helpers for updating medication records.
 import { updateMedication } from "@/lib/firebase/repo";
 
 export async function updateUserMedicationTaken(uid: string, medicationId: string) {

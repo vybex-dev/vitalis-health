@@ -1,3 +1,4 @@
+// src/app/(auth)/layout.tsx: Layout wrapper for the login and signup pages.
 "use client";
 
 import dynamic from "next/dynamic";

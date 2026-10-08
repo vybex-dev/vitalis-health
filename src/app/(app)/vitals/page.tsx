@@ -1,3 +1,4 @@
+// src/app/(app)/vitals/page.tsx: Vitals tracking page with entry form and charts.
 "use client";
 
 import { useState } from "react";

@@ -1,3 +1,4 @@
+// src/app/(app)/chat/page.tsx: AI health copilot chat page with mode toggle and thread history.
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";

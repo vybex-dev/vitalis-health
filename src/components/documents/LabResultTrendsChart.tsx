@@ -1,3 +1,4 @@
+// src/components/documents/LabResultTrendsChart.tsx: Chart of a lab result's values over time.
 "use client";
 
 import { useState } from "react";

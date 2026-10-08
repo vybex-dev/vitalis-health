@@ -1,3 +1,4 @@
+// src/app/api/medications/check-interactions/route.ts: API route that checks drug interactions using label data.
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";

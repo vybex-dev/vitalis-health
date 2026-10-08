@@ -1,3 +1,4 @@
+// src/components/ui/Spinner.tsx: Loading spinner components.
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

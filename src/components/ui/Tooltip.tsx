@@ -1,3 +1,4 @@
+// src/components/ui/Tooltip.tsx: Reusable tooltip component.
 "use client";
 
 import { useState, type ReactNode } from "react";

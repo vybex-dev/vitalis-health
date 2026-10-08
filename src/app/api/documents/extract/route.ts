@@ -1,3 +1,4 @@
+// src/app/api/documents/extract/route.ts: API route that extracts labs and medications from uploaded documents.
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSONFromFile, geminiAvailable } from "@/lib/ai/gemini";
 import { DOCUMENT_EXTRACTION_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";

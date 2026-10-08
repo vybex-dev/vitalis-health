@@ -1,3 +1,4 @@
+// src/components/chat/ModeToggle.tsx: Toggle between quick and deep chat modes.
 "use client";
 
 import { Zap, Brain } from "lucide-react";

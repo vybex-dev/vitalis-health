@@ -1,3 +1,4 @@
+// src/lib/visitBrief.ts: Builds the doctor visit brief.
 import { summarizeVitals, type VitalTrend } from "@/lib/trends";
 import type {
   JournalEntry,

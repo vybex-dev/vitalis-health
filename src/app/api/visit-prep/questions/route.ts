@@ -1,3 +1,4 @@
+// src/app/api/visit-prep/questions/route.ts: API route that suggests questions to ask at a doctor visit.
 import { z } from "zod";
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { generateGeminiJSON, geminiAvailable } from "@/lib/ai/gemini";

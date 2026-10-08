@@ -1,3 +1,4 @@
+// src/app/(app)/insights/page.tsx: Weekly AI insights page with trends and observations.
 "use client";
 
 import { useState } from "react";

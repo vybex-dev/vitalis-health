@@ -1,3 +1,4 @@
+// tests/visitBrief.test.ts: Tests for visit brief generation.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { linearSlope, summarizeVitals } from "../src/lib/trends";

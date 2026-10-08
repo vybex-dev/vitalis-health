@@ -1,3 +1,4 @@
+// src/components/journal/JournalEntryForm.tsx: Form for creating a journal entry with mood and notes.
 "use client";
 
 import { useState } from "react";

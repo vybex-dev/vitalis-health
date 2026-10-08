@@ -1,3 +1,4 @@
+// src/components/dashboard/UpcomingMeds.tsx: List of upcoming medication doses.
 "use client";
 
 import { Pill, Check } from "lucide-react";

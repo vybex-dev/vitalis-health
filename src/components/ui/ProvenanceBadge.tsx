@@ -1,3 +1,4 @@
+// src/components/ui/ProvenanceBadge.tsx: Badge indicating where a piece of data came from.
 import { ShieldCheck, ShieldAlert, ShieldQuestion, BookMarked, Bot } from "lucide-react";
 import { Badge } from "./Badge";
 

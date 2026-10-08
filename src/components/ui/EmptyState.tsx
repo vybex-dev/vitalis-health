@@ -1,3 +1,4 @@
+// src/components/ui/EmptyState.tsx: Placeholder shown when a list or section has no data.
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";

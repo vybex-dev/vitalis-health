@@ -1,3 +1,4 @@
+// src/app/api/chat/deep/route.ts: API route for the deeper, higher-quality chat mode.
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
 import { streamGeminiChat, geminiAvailable, type SimpleMessage } from "@/lib/ai/gemini";
 import { COPILOT_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";

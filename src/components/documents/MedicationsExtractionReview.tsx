@@ -1,3 +1,4 @@
+// src/components/documents/MedicationsExtractionReview.tsx: Review and confirm medications extracted from a document.
 "use client";
 
 import { useState } from "react";

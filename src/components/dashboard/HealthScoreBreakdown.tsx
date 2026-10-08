@@ -1,3 +1,4 @@
+// src/components/dashboard/HealthScoreBreakdown.tsx: Breakdown of the factors that make up the health score.
 "use client";
 
 import { ProgressRing } from "@/components/ui/ProgressRing";

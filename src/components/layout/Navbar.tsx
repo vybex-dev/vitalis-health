@@ -1,3 +1,4 @@
+// src/components/layout/Navbar.tsx: Top navigation bar for public pages.
 "use client";
 
 import Link from "next/link";

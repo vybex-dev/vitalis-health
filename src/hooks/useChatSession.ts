@@ -1,3 +1,4 @@
+// src/hooks/useChatSession.ts: Hook managing chat messages, threads and sending to the API.
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";

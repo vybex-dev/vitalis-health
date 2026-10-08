@@ -1,3 +1,4 @@
+// src/components/three/ParticleField.tsx: 3D particle field background.
 "use client";
 
 import { useMemo, useRef } from "react";

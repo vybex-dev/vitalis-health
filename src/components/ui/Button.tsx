@@ -1,3 +1,4 @@
+// src/components/ui/Button.tsx: Reusable button component with variants.
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";

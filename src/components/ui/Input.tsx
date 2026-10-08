@@ -1,3 +1,4 @@
+// src/components/ui/Input.tsx: Reusable text input component.
 import { forwardRef, type InputHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
