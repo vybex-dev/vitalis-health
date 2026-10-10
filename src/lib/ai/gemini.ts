@@ -1,4 +1,3 @@
-// src/lib/ai/gemini.ts: Gemini API client helpers.
 import { GoogleGenerativeAI, type Content } from "@google/generative-ai";
 /**
  * Gemini's `responseMimeType: "application/json"` mode is reliable but not
@@ -51,6 +50,65 @@ function getClient() {
 // Override with GEMINI_MODEL in the environment (e.g. "gemini-3.8-flash") without a code change.
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
+// If the primary model is unavailable (404), rate-limited (429) or overloaded (5xx), try the next one.
+// Override with GEMINI_FALLBACK_MODELS (comma-separated). Key/permission errors (401/403) are never retried:
+// another model won't fix a bad key.
+const FALLBACK_MODELS = (process.env.GEMINI_FALLBACK_MODELS ?? "gemini-3.7-flash,gemini-3.5-flash")
+  .split(",")
+  .map((m) => m.trim())
+  .filter(Boolean);
+
+export function modelChain(): string[] {
+  return [GEMINI_MODEL, ...FALLBACK_MODELS.filter((m) => m !== GEMINI_MODEL)];
+}
+
+/** Pulls the HTTP status out of the SDK's error (it exposes `.status`, and also embeds "[429 ...]" in the message). */
+export function geminiErrorStatus(err: unknown): number | undefined {
+  const e = err as { status?: number; message?: string };
+  if (typeof e?.status === "number") return e.status;
+  const m = /\[(\d{3})\s/.exec(e?.message ?? "");
+  return m ? Number(m[1]) : undefined;
+}
+
+function isKeyProblem(err: unknown): boolean {
+  const status = geminiErrorStatus(err);
+  const msg = (err as Error)?.message ?? "";
+  return status === 401 || status === 403 || (status === 400 && /api key/i.test(msg));
+}
+
+/** Short, user-safe explanation of a Gemini failure (the full error still goes to server logs). */
+export function describeGeminiError(err: unknown): { status: number; message: string } {
+  const status = geminiErrorStatus(err);
+  if (isKeyProblem(err)) {
+    return { status: 502, message: "The AI service rejected the server's API key. The site owner needs to check GEMINI_API_KEY." };
+  }
+  if (status === 429) {
+    return { status: 429, message: "The AI service is at its rate limit right now. Please wait a minute and try again." };
+  }
+  if (status === 404) {
+    return { status: 502, message: "The configured AI model isn't available for this key. The site owner needs to check GEMINI_MODEL." };
+  }
+  if (status && status >= 500) {
+    return { status: 502, message: "The AI service is temporarily overloaded. Please try again in a moment." };
+  }
+  return { status: 502, message: "Couldn't reach the AI service. Please try again." };
+}
+
+export async function withModelFallback<T>(run: (modelName: string) => Promise<T>): Promise<T> {
+  let lastErr: unknown;
+  for (const name of modelChain()) {
+    try {
+      return await run(name);
+    } catch (err) {
+      lastErr = err;
+      console.error(`Gemini call failed on ${name} (status ${geminiErrorStatus(err) ?? "n/a"}):`, (err as Error)?.message);
+      if (isKeyProblem(err)) throw err;
+      if (err instanceof SyntaxError) throw err; // bad JSON from the model, not an availability problem
+    }
+  }
+  throw lastErr;
+}
+
 export interface SimpleMessage {
   role: "system" | "user" | "assistant";
   content: string;
@@ -74,20 +132,31 @@ function toGeminiHistory(messages: SimpleMessage[]): {
 export async function* streamGeminiChat(messages: SimpleMessage[]) {
   const genAI = getClient();
   const { systemInstruction, history } = toGeminiHistory(messages);
-  const model = genAI.getGenerativeModel({
-    model: GEMINI_MODEL,
-    systemInstruction,
-  });
-
   const last = history[history.length - 1];
   const priorHistory = history.slice(0, -1);
-  const chat = model.startChat({ history: priorHistory });
-  const result = await chat.sendMessageStream(last.parts[0].text ?? "");
 
-  for await (const chunk of result.stream) {
-    const text = chunk.text();
-    if (text) yield text;
+  let lastErr: unknown;
+  for (const name of modelChain()) {
+    let yielded = false;
+    try {
+      const model = genAI.getGenerativeModel({ model: name, systemInstruction });
+      const chat = model.startChat({ history: priorHistory });
+      const result = await chat.sendMessageStream(last.parts[0].text ?? "");
+      for await (const chunk of result.stream) {
+        const text = chunk.text();
+        if (text) {
+          yielded = true;
+          yield text;
+        }
+      }
+      return;
+    } catch (err) {
+      lastErr = err;
+      console.error(`Gemini stream failed on ${name}:`, (err as Error)?.message);
+      if (yielded || isKeyProblem(err)) throw err; // can't switch models mid-answer
+    }
   }
+  throw lastErr;
 }
 
 /**
@@ -103,21 +172,23 @@ export async function generateGeminiJSONFromFile<T>(
   promptText: string,
 ): Promise<T> {
   const genAI = getClient();
-  const model = genAI.getGenerativeModel({
-    model: GEMINI_MODEL,
-    systemInstruction,
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.2,
-      maxOutputTokens: 4096,
-    },
+  return withModelFallback(async (name) => {
+    const model = genAI.getGenerativeModel({
+      model: name,
+      systemInstruction,
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+        // Gemini 3.x "thinking" tokens count against this budget, so leave headroom beyond the JSON itself.
+        maxOutputTokens: 8192,
+      },
+    });
+    const result = await model.generateContent([
+      { inlineData: { data: fileBase64, mimeType } },
+      { text: promptText },
+    ]);
+    return safeJSONParse<T>(result.response.text());
   });
-  const result = await model.generateContent([
-    { inlineData: { data: fileBase64, mimeType } },
-    { text: promptText },
-  ]);
-  const text = result.response.text();
-  return safeJSONParse<T>(text);
 }
 
 /**
@@ -131,16 +202,17 @@ export async function generateGeminiJSON<T>(
   opts: { maxOutputTokens?: number; temperature?: number } = {},
 ): Promise<T> {
   const genAI = getClient();
-  const model = genAI.getGenerativeModel({
-    model: GEMINI_MODEL,
-    systemInstruction,
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: opts.temperature ?? 0.3,
-      maxOutputTokens: opts.maxOutputTokens ?? 4096,
-    },
+  return withModelFallback(async (name) => {
+    const model = genAI.getGenerativeModel({
+      model: name,
+      systemInstruction,
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: opts.temperature ?? 0.3,
+        maxOutputTokens: opts.maxOutputTokens ?? 4096,
+      },
+    });
+    const result = await model.generateContent(userContent);
+    return safeJSONParse<T>(result.response.text());
   });
-  const result = await model.generateContent(userContent);
-  const text = result.response.text();
-  return safeJSONParse<T>(text);
 }

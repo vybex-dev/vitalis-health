@@ -1,6 +1,5 @@
-// src/app/api/documents/extract/route.ts: API route that extracts labs and medications from uploaded documents.
 import { verifyRequestToken, adminAvailable } from "@/lib/firebase/admin";
-import { generateGeminiJSONFromFile, geminiAvailable } from "@/lib/ai/gemini";
+import { generateGeminiJSONFromFile, geminiAvailable, describeGeminiError } from "@/lib/ai/gemini";
 import { DOCUMENT_EXTRACTION_SYSTEM_PROMPT } from "@/lib/ai/systemPrompts";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { anonIpLimited } from "@/lib/api/guard";
@@ -91,9 +90,7 @@ export async function POST(request: Request) {
     return Response.json(extraction);
   } catch (err) {
     console.error("Document extraction error", err);
-    return Response.json(
-      { error: "Couldn't read that document right now. Please try again, or enter the details manually." },
-      { status: 502 }
-    );
+    const { status, message } = describeGeminiError(err);
+    return Response.json({ error: `${message} You can also enter the details manually.` }, { status });
   }
 }
